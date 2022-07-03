@@ -17,7 +17,7 @@ function spriteSetup()
     slimeSprite = AnimatedSprite.new(slimeTable)
     slimeSprite:addState("Idle", 1, 6, {tickStep = 2})
     slimeSprite:playAnimation()
-    slimeSprite:moveTo(200, 120)
+    slimeSprite:moveTo(21, 219)
     slimeSprite:setCollideRect(0, 1, 16, 15)
 
 end
@@ -77,10 +77,33 @@ function bgSetup()
         self:add()
     end
 
+    class('Block').extends('Wall')
+
+    function Block:init(x, y, w, h)
+        Block.super.init(self, x, y, w, h)
+        self:setCollideRect(0, 0, w, h - 1)
+    end
+
     local rightWall = Wall(screenWidth, 120, wallWidth, screenHeight)
     local leftWall = Wall(0, 120, wallWidth, screenHeight)
     local bottomWall = Wall(200, screenHeight, screenWidth, wallWidth)
     local topWall = Wall(200, 0, screenWidth, wallWidth)
+
+    local level = 1
+
+    if level == 1 then
+        
+        local leftBottomWall = Wall(50, (screenHeight / 2) + 38, wallWidth, 158)
+        local leftTopWall = Wall(100, 82, wallWidth, 158)
+
+        local obs1 = Block(175, 50, 20, 20)
+        local obs2 = Block(175, 120, 20, 20)
+        local obs3 = Block(175, 190, 20, 20)
+        local obs4 = Block(300, 120, 100, 100)
+
+
+
+    end
 
 end
 
