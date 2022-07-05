@@ -39,6 +39,15 @@ function moveSprite()
 
 end
 
+function restart()
+
+    if pd.buttonIsPressed("a") then
+        gfx.sprite.removeAll()
+        spriteSetup()
+        bgSetup()
+    end
+end
+
 function bgSetup()
     
     local backgroundImage = gfx.image.new("images/checkered-bg")
@@ -82,6 +91,10 @@ function bgSetup()
     function Block:init(x, y, w, h)
         Block.super.init(self, x, y, w, h)
         self:setCollideRect(0, 0, w, h - 1)
+        function self:draw()
+            local r = w / 7
+            gfx.fillRoundRect(0, 0, w, h, r)
+        end
     end
 
     local rightWall = Wall(screenWidth, 120, wallWidth, screenHeight)
@@ -101,8 +114,6 @@ function bgSetup()
         local obs3 = Block(175, 190, 20, 20)
         local obs4 = Block(300, 120, 100, 100)
 
-
-
     end
 
 end
@@ -121,5 +132,6 @@ function playdate.update()
 
     moveSprite()
     gfx.sprite.update()
+    restart()
 
 end
