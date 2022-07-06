@@ -102,7 +102,7 @@ function bgSetup()
     local bottomWall = Wall(200, screenHeight, screenWidth, wallWidth)
     local topWall = Wall(200, 0, screenWidth, wallWidth)
 
-    local level = 1
+    local level = 2
 
     if level == 1 then
         
@@ -113,6 +113,14 @@ function bgSetup()
         local obs2 = Block(175, 120, 20, 20)
         local obs3 = Block(175, 190, 20, 20)
         local obs4 = Block(300, 120, 100, 100)
+
+    end
+
+    if level == 2 then
+    
+        local obs1 = Block(200, 30, 25, 25)
+        local obs2 = Block(200, 120, 100, 100)
+        local obs3 = Block(200, 210, 25, 25)
 
     end
 
