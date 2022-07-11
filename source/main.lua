@@ -10,6 +10,7 @@ local gfx <const> = pd.graphics
 
 local slimeSprite = nil
 local playerSpeed = 3
+math.randomseed(pd.getSecondsSinceEpoch())
 
 function spriteSetup()
 
@@ -41,7 +42,7 @@ end
 
 function restart()
 
-    if pd.buttonIsPressed("a") then
+    if pd.buttonJustPressed("a") then
         gfx.sprite.removeAll()
         spriteSetup()
         bgSetup()
@@ -101,6 +102,9 @@ function bgSetup()
     local leftWall = Wall(0, 120, wallWidth, screenHeight)
     local bottomWall = Wall(200, screenHeight, screenWidth, wallWidth)
     local topWall = Wall(200, 0, screenWidth, wallWidth)
+
+    local num = math.floor(math.random() * 10)
+    print(num)
 
     local level = 2
 
