@@ -18,7 +18,6 @@ function spriteSetup()
     slimeSprite = AnimatedSprite.new(slimeTable)
     slimeSprite:addState("Idle", 1, 6, {tickStep = 2})
     slimeSprite:playAnimation()
-    slimeSprite:moveTo(21, 219)
     slimeSprite:setCollideRect(0, 1, 16, 15)
 
 end
@@ -104,9 +103,14 @@ function bgSetup()
     local topWall = Wall(200, 0, screenWidth, wallWidth)
 
     local num = math.floor(math.random() * 10)
-    print(num)
 
-    local level = 2
+    local level
+
+    if num < 5 then
+        level = 1
+    else
+        level = 2
+    end
 
     if level == 1 then
         
@@ -118,13 +122,17 @@ function bgSetup()
         local obs3 = Block(175, 190, 20, 20)
         local obs4 = Block(300, 120, 100, 100)
 
+        slimeSprite:moveTo(21, 219)
+
     end
 
     if level == 2 then
     
-        local obs1 = Block(200, 30, 25, 25)
+        local obs1 = Block(200, 40, 25, 25)
         local obs2 = Block(200, 120, 100, 100)
-        local obs3 = Block(200, 210, 25, 25)
+        local obs3 = Block(200, 200, 25, 25)
+
+        slimeSprite:moveTo(21, 119)
 
     end
 
