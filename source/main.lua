@@ -10,6 +10,8 @@ local gfx <const> = pd.graphics
 
 local slimeSprite = nil
 local playerSpeed = 3
+local grav = 2
+
 math.randomseed(pd.getSecondsSinceEpoch())
 
 function spriteSetup()
@@ -19,6 +21,19 @@ function spriteSetup()
     slimeSprite:addState("Idle", 1, 6, {tickStep = 2})
     slimeSprite:playAnimation()
     slimeSprite:setCollideRect(0, 1, 16, 15)
+    slimeSprite:setTag(1)
+
+end
+
+function physicsUpdate()
+
+    gravity = function (spr)
+        if spr:getTag() == 1 then
+            spr:moveWithCollisions(slimeSprite.x, slimeSprite.y + grav)
+        end
+    end
+
+    gfx.sprite.performOnAllSprites(gravity)
 
 end
 
@@ -150,6 +165,7 @@ setup()
 
 function playdate.update()
 
+    physicsUpdate()
     moveSprite()
     gfx.sprite.update()
     restart()
