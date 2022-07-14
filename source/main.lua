@@ -10,7 +10,7 @@ local gfx <const> = pd.graphics
 
 local slimeSprite = nil
 local playerSpeed = 3
-local grav = 2
+local grav = 0
 
 math.randomseed(pd.getSecondsSinceEpoch())
 
@@ -20,7 +20,7 @@ function spriteSetup()
     slimeSprite = AnimatedSprite.new(slimeTable)
     slimeSprite:addState("Idle", 1, 6, {tickStep = 2})
     slimeSprite:playAnimation()
-    slimeSprite:setCollideRect(0, 1, 16, 15)
+    slimeSprite:setCollideRect(0, 1, 15, 15)
     slimeSprite:setTag(1)
 
 end
@@ -38,18 +38,28 @@ function physicsUpdate()
 end
 
 function moveSprite()
-
     if pd.buttonIsPressed("up") then
-        slimeSprite:moveWithCollisions(slimeSprite.x, slimeSprite.y - playerSpeed)
+        coll = slimeSprite:moveWithCollisions(slimeSprite.x, slimeSprite.y - playerSpeed)
     end
     if pd.buttonIsPressed("down") then
-        slimeSprite:moveWithCollisions(slimeSprite.x, slimeSprite.y + playerSpeed)
+        coll = slimeSprite:moveWithCollisions(slimeSprite.x, slimeSprite.y + playerSpeed)
     end
     if pd.buttonIsPressed("left") then
-        slimeSprite:moveWithCollisions(slimeSprite.x - playerSpeed, slimeSprite.y)
+        coll = slimeSprite:moveWithCollisions(slimeSprite.x - playerSpeed, slimeSprite.y)
     end
     if pd.buttonIsPressed("right") then
-        slimeSprite:moveWithCollisions(slimeSprite.x + playerSpeed, slimeSprite.y)
+        coll = slimeSprite:moveWithCollisions(slimeSprite.x + playerSpeed, slimeSprite.y)
+    end
+    local rec = slimeSprite:getCollideRect()
+    local w = rec.width
+    local h = rec.height
+    local colls = slimeSprite.querySpritesInRect(slimeSprite.x, slimeSprite.y + h, w, 1)
+    print(slimeSprite.x + w, "playerColl.x")
+    
+    for i = 1, #colls do
+        if  not (colls[i] == slimeSprite) then
+            print (colls[i].x, "obsColl.x")
+        end
     end
 
 end
@@ -99,6 +109,7 @@ function bgSetup()
         self:setCollideRect(0, 0, self:getSize())
         self:moveTo(x, y)
         self:add()
+        self.type = "Wall"
     end
 
     class('Block').extends('Wall')
@@ -106,6 +117,7 @@ function bgSetup()
     function Block:init(x, y, w, h)
         Block.super.init(self, x, y, w, h)
         self:setCollideRect(0, 0, w, h - 1)
+        self.type = "Block"
         function self:draw()
             local r = w / 7
             gfx.fillRoundRect(0, 0, w, h, r)
@@ -115,7 +127,9 @@ function bgSetup()
     local rightWall = Wall(screenWidth, 120, wallWidth, screenHeight)
     local leftWall = Wall(0, 120, wallWidth, screenHeight)
     local bottomWall = Wall(200, screenHeight, screenWidth, wallWidth)
+    bottomWall.type = "Floor"
     local topWall = Wall(200, 0, screenWidth, wallWidth)
+    topWall.type = "Ceiling"
 
     local num = math.floor(math.random() * 10)
 
