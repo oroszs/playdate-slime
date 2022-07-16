@@ -9,19 +9,49 @@ local pd <const> = playdate
 local gfx <const> = pd.graphics
 
 local slimeSprite = nil
-local playerSpeed = 3
+local playerSpeed = 2
 local grav = 0
 
 math.randomseed(pd.getSecondsSinceEpoch())
 
 function spriteSetup()
 
+    class('Debug').extends(gfx.sprite)
+
+    function Debug:init(x, y, w, h)
+        Debug.super.init(self)
+        function self:draw()
+            gfx.drawRect(0, 0, w, h)
+        end
+        self:moveTo(x, y + 15)
+        self:setSize(w, h)
+        self:setCenter(0,0)
+        self:add()
+    end
+
+    class('Slime').extends(AnimatedSprite)
+
+    function Slime:init(imageTable, x, y)
+        Slime.super.init(self, imageTable)
+        self.debug = Debug(x, y, 16, 2)
+    end
+
     local slimeTable = gfx.imagetable.new("images/slime")
-    slimeSprite = AnimatedSprite.new(slimeTable)
+    slimeSprite = Slime(slimeTable, 0, 0)
     slimeSprite:addState("Idle", 1, 6, {tickStep = 2})
     slimeSprite:playAnimation()
     slimeSprite:setCollideRect(0, 1, 15, 15)
     slimeSprite:setTag(1)
+    slimeSprite:setCenter(0,0)
+
+    function Slime:moveTo(x, y)
+        Slime.super.moveTo(self, x, y)
+        self.debug:moveTo(x, y + 15)
+    end
+    function Slime:moveWithCollisions(x, y)
+        Slime.super.moveWithCollisions(self, x, y)
+        self.debug:moveTo(x, y + 15)
+    end
 
 end
 
@@ -53,12 +83,11 @@ function moveSprite()
     local rec = slimeSprite:getCollideRect()
     local w = rec.width
     local h = rec.height
-    local colls = slimeSprite.querySpritesInRect(slimeSprite.x, slimeSprite.y + h, w, 1)
-    print(slimeSprite.x + w, "playerColl.x")
+    local colls = slimeSprite.querySpritesInRect(slimeSprite.x, slimeSprite.y + h, 16, 2)
     
     for i = 1, #colls do
         if  not (colls[i] == slimeSprite) then
-            print (colls[i].x, "obsColl.x")
+            print (colls[i].type)
         end
     end
 
@@ -141,6 +170,8 @@ function bgSetup()
         level = 2
     end
 
+        level = 3
+
     if level == 1 then
         
         local leftBottomWall = Wall(50, (screenHeight / 2) + 38, wallWidth, 158)
@@ -163,6 +194,10 @@ function bgSetup()
 
         slimeSprite:moveTo(21, 119)
 
+    end
+
+    if level == 3 then
+        slimeSprite:moveTo(200, 120)
     end
 
 end
