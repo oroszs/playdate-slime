@@ -23,7 +23,7 @@ function spriteSetup()
         function self:draw()
             gfx.drawRect(0, 0, w, h)
         end
-        self:moveTo(x, y + 15)
+        self:moveTo(x, y + w)
         self:setSize(w, h)
         self:setCenter(0,0)
         self:add()
@@ -31,26 +31,27 @@ function spriteSetup()
 
     class('Slime').extends(AnimatedSprite)
 
-    function Slime:init(imageTable, x, y)
+    function Slime:init(imageTable, x, y, w)
         Slime.super.init(self, imageTable)
-        self.debug = Debug(x, y, 16, 2)
+        self.debug = Debug(x, y, w, 2)
+        self.w = w
     end
 
     local slimeTable = gfx.imagetable.new("images/slime")
-    slimeSprite = Slime(slimeTable, 0, 0)
+    slimeSprite = Slime(slimeTable, 0, 0, 15)
     slimeSprite:addState("Idle", 1, 6, {tickStep = 2})
     slimeSprite:playAnimation()
-    slimeSprite:setCollideRect(0, 1, 15, 15)
+    slimeSprite:setCollideRect(0, 1, slimeSprite.w, slimeSprite.w)
     slimeSprite:setTag(1)
     slimeSprite:setCenter(0,0)
 
     function Slime:moveTo(x, y)
         Slime.super.moveTo(self, x, y)
-        self.debug:moveTo(x, y + 15)
+        self.debug:moveTo(x, y + self.w)
     end
     function Slime:moveWithCollisions(x, y)
         Slime.super.moveWithCollisions(self, x, y)
-        self.debug:moveTo(x, y + 15)
+        self.debug:moveTo(x, y + self.w)
     end
 
 end
@@ -80,10 +81,8 @@ function moveSprite()
     if pd.buttonIsPressed("right") then
         coll = slimeSprite:moveWithCollisions(slimeSprite.x + playerSpeed, slimeSprite.y)
     end
-    local rec = slimeSprite:getCollideRect()
-    local w = rec.width
-    local h = rec.height
-    local colls = slimeSprite.querySpritesInRect(slimeSprite.x, slimeSprite.y + h, 16, 2)
+
+    local colls = slimeSprite.querySpritesInRect(slimeSprite.x, slimeSprite.y + slimeSprite.w, slimeSprite.w, 2)
     
     for i = 1, #colls do
         if  not (colls[i] == slimeSprite) then
@@ -170,7 +169,6 @@ function bgSetup()
         level = 2
     end
 
-        level = 3
 
     if level == 1 then
         
