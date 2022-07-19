@@ -8,14 +8,17 @@ import "libraries/AnimatedSprite.lua"
 local pd <const> = playdate
 local gfx <const> = pd.graphics
 
-local slimeSprite = nil
-local playerSpeed = 2
-local grav = 0
+local slimeSprite, dt = nil
+local playerSpeed = 10
+local grav = 2
+local lastTime = pd.getCurrentTimeMilliseconds()
+local maxFallSpeed = 10
+local jumpForce = 10
 
 math.randomseed(pd.getSecondsSinceEpoch())
 
 function spriteSetup()
-
+--[[
     class('Debug').extends(gfx.sprite)
 
     function Debug:init(x, y, w, h)
@@ -28,13 +31,16 @@ function spriteSetup()
         self:setCenter(0,0)
         self:add()
     end
-
+]]
     class('Slime').extends(AnimatedSprite)
 
     function Slime:init(imageTable, x, y, w)
         Slime.super.init(self, imageTable)
-        self.debug = Debug(x, y, w, 2)
+        --self.debug = Debug(x, y, w, 2)
         self.w = w
+        self.grounded = false
+        self.dx = 0
+        self.dy = 0
     end
 
     local slimeTable = gfx.imagetable.new("images/slime")
@@ -47,47 +53,66 @@ function spriteSetup()
 
     function Slime:moveTo(x, y)
         Slime.super.moveTo(self, x, y)
-        self.debug:moveTo(x, y + self.w)
+        --self.debug:moveTo(x, y + self.w)
     end
     function Slime:moveWithCollisions(x, y)
+        local wasGrounded = self.grounded
         Slime.super.moveWithCollisions(self, x, y)
-        self.debug:moveTo(x, y + self.w)
+        if not (wasGrounded == self.grounded) then
+            if self.grounded then print('Grounded') else print('Not Grounded') end
+        end
+        --self.debug:moveTo(x, y + self.w)
     end
 
 end
 
 function physicsUpdate()
 
+    local newTime = pd.getCurrentTimeMilliseconds()
+    dt = (newTime - lastTime) / 100
+    lastTime = newTime
+    local gForce = grav * dt
+
+    local collSprites = slimeSprite.querySpritesInRect(slimeSprite.x, slimeSprite.y + slimeSprite.w, slimeSprite.w, 2)
+    slimeSprite.grounded = false
+    for i = 1, #collSprites do
+        if not (collSprites[i] == slimeSprite) then
+            slimeSprite.grounded = true
+        end
+    end
+
     gravity = function (spr)
         if spr:getTag() == 1 then
-            spr:moveWithCollisions(slimeSprite.x, slimeSprite.y + grav)
+            if not spr.grounded then
+                if spr.dy < maxFallSpeed then
+                    spr.dy += gForce else
+                    spr.dy = maxFallSpeed
+                end
+            else
+                spr.dy = 0
+            end
+
+            spr:moveWithCollisions(spr.x, spr.y + spr.dy)
         end
     end
 
     gfx.sprite.performOnAllSprites(gravity)
 
+
 end
 
 function moveSprite()
-    if pd.buttonIsPressed("up") then
-        coll = slimeSprite:moveWithCollisions(slimeSprite.x, slimeSprite.y - playerSpeed)
-    end
-    if pd.buttonIsPressed("down") then
-        coll = slimeSprite:moveWithCollisions(slimeSprite.x, slimeSprite.y + playerSpeed)
+    local pSpeed = playerSpeed * dt
+
+    if pd.buttonJustPressed("up") and slimeSprite.grounded then
+        slimeSprite.dy = -jumpForce
+        coll = slimeSprite:moveWithCollisions(slimeSprite.x, slimeSprite.y + slimeSprite.dy)
     end
     if pd.buttonIsPressed("left") then
-        coll = slimeSprite:moveWithCollisions(slimeSprite.x - playerSpeed, slimeSprite.y)
+        coll = slimeSprite:moveWithCollisions(slimeSprite.x - pSpeed, slimeSprite.y + slimeSprite.dy)
     end
     if pd.buttonIsPressed("right") then
-        coll = slimeSprite:moveWithCollisions(slimeSprite.x + playerSpeed, slimeSprite.y)
-    end
-
-    local colls = slimeSprite.querySpritesInRect(slimeSprite.x, slimeSprite.y + slimeSprite.w, slimeSprite.w, 2)
-    
-    for i = 1, #colls do
-        if  not (colls[i] == slimeSprite) then
-            print (colls[i].type)
-        end
+        coll = slimeSprite:moveWithCollisions(slimeSprite.x + pSpeed, slimeSprite.y + slimeSprite.dy)
     end
 
 end
