@@ -12,7 +12,7 @@ local slimeSprite, dt = nil
 local playerSpeed = 10
 local grav = 2
 local lastTime = pd.getCurrentTimeMilliseconds()
-local maxFallSpeed = 10
+local maxFallSpeed = 15
 local jumpForce = 10
 
 math.randomseed(pd.getSecondsSinceEpoch())
@@ -50,19 +50,7 @@ function spriteSetup()
     slimeSprite:setCollideRect(0, 1, slimeSprite.w, slimeSprite.w)
     slimeSprite:setTag(1)
     slimeSprite:setCenter(0,0)
-
-    function Slime:moveTo(x, y)
-        Slime.super.moveTo(self, x, y)
-        --self.debug:moveTo(x, y + self.w)
-    end
-    function Slime:moveWithCollisions(x, y)
-        local wasGrounded = self.grounded
-        Slime.super.moveWithCollisions(self, x, y)
-        if not (wasGrounded == self.grounded) then
-            if self.grounded then print('Grounded') else print('Not Grounded') end
-        end
-        --self.debug:moveTo(x, y + self.w)
-    end
+    slimeSprite.collisionResponse = "slide"
 
 end
 
@@ -73,11 +61,24 @@ function physicsUpdate()
     lastTime = newTime
     local gForce = grav * dt
 
-    local collSprites = slimeSprite.querySpritesInRect(slimeSprite.x, slimeSprite.y + slimeSprite.w, slimeSprite.w, 2)
+    local collSprites = slimeSprite.querySpritesInRect(slimeSprite.x + 1, slimeSprite.y + slimeSprite.w, slimeSprite.w - 2, 2)
+    local wasGrounded = slimeSprite.grounded
     slimeSprite.grounded = false
     for i = 1, #collSprites do
         if not (collSprites[i] == slimeSprite) then
             slimeSprite.grounded = true
+        end
+    end
+
+    if not (wasGrounded == slimeSprite.grounded) then
+        --if slimeSprite.grounded then print('Grounded') else print('Not Grounded') end
+    end
+
+    local ceilSprites = slimeSprite.querySpritesInRect(slimeSprite.x, slimeSprite.y, slimeSprite.w, 4)
+
+    for i = 1, #ceilSprites do
+        if not (ceilSprites[i] == slimeSprite) then
+            slimeSprite.dy = 0
         end
     end
 
@@ -92,7 +93,8 @@ function physicsUpdate()
                 spr.dy = 0
             end
 
-            spr:moveWithCollisions(spr.x, spr.y + spr.dy)
+            spr:moveWithCollisions(math.floor(spr.x + spr.dx), math.ceil(spr.y + spr.dy))
+
         end
     end
 
@@ -103,23 +105,30 @@ end
 
 function moveSprite()
     local pSpeed = playerSpeed * dt
+    slimeSprite.dx = 0
 
-    if pd.buttonJustPressed("up") and slimeSprite.grounded then
+    if (pd.buttonJustPressed("up") or pd.buttonJustPressed("a") or pd.buttonJustPressed("b")) and slimeSprite.grounded then
         slimeSprite.dy = -jumpForce
-        coll = slimeSprite:moveWithCollisions(slimeSprite.x, slimeSprite.y + slimeSprite.dy)
+        slimeSprite:moveWithCollisions(math.floor(slimeSprite.x), math.ceil(slimeSprite.y + slimeSprite.dy))
     end
+
+    if (pd.buttonJustReleased("up") or pd.buttonJustReleased("a") or pd.buttonJustReleased("b")) and slimeSprite.dy < 0 then
+        slimeSprite.dy /= 2
+    end
+
     if pd.buttonIsPressed("left") then
-        coll = slimeSprite:moveWithCollisions(slimeSprite.x - pSpeed, slimeSprite.y + slimeSprite.dy)
+        slimeSprite.dx = -pSpeed
     end
+
     if pd.buttonIsPressed("right") then
-        coll = slimeSprite:moveWithCollisions(slimeSprite.x + pSpeed, slimeSprite.y + slimeSprite.dy)
+        slimeSprite.dx = pSpeed
     end
 
 end
 
 function restart()
 
-    if pd.buttonJustPressed("a") then
+    if pd.buttonIsPressed("down") and pd.buttonJustPressed("b") then
         gfx.sprite.removeAll()
         spriteSetup()
         bgSetup()
@@ -159,6 +168,7 @@ function bgSetup()
             gfx.fillRect(0, 0, w, h)
         end
         self:setSize(w, h)
+        self:setCenter(0,0)
         self:setCollideRect(0, 0, self:getSize())
         self:moveTo(x, y)
         self:add()
@@ -169,19 +179,30 @@ function bgSetup()
 
     function Block:init(x, y, w, h)
         Block.super.init(self, x, y, w, h)
-        self:setCollideRect(0, 0, w, h - 1)
         self.type = "Block"
         function self:draw()
-            local r = w / 7
+            local r = 4
             gfx.fillRoundRect(0, 0, w, h, r)
         end
     end
 
-    local rightWall = Wall(screenWidth, 120, wallWidth, screenHeight)
-    local leftWall = Wall(0, 120, wallWidth, screenHeight)
-    local bottomWall = Wall(200, screenHeight, screenWidth, wallWidth)
+    class('SmallBlock').extends('Block')
+
+    function SmallBlock:init(x, y)
+        SmallBlock.super.init(self, x, y, 25, 25)
+    end
+
+    class('BigBlock').extends('Block')
+
+    function BigBlock:init(x, y)
+        BigBlock.super.init(self, x, y, 75, 75)
+    end
+
+    local rightWall = Wall(screenWidth - wallWidth, 0, wallWidth, screenHeight)
+    local leftWall = Wall(0, 0, wallWidth, screenHeight)
+    local bottomWall = Wall(0, screenHeight - wallWidth, screenWidth, wallWidth)
     bottomWall.type = "Floor"
-    local topWall = Wall(200, 0, screenWidth, wallWidth)
+    local topWall = Wall(0, 0, screenWidth, wallWidth)
     topWall.type = "Ceiling"
 
     local num = math.floor(math.random() * 10)
@@ -194,33 +215,34 @@ function bgSetup()
         level = 2
     end
 
+    level = 1
 
     if level == 1 then
         
-        local leftBottomWall = Wall(50, (screenHeight / 2) + 38, wallWidth, 158)
-        local leftTopWall = Wall(100, 82, wallWidth, 158)
+        local b1 = BigBlock(27, 177)
+        local b3 = SmallBlock(207, 167)
+        local b32 = Block(287, 127, 25, 65)
+        local b4 = Block(347, 99, 25, 93)
+        local b6 = Block(207, 47, 105, 25)
+        local b7 = Block(127, 87, 25, 105)
+        local b8 = Block(-5, 47, 67, 25)
+        local b9 = Block(-5, 127, 27, 25)
 
-        local obs1 = Block(175, 50, 20, 20)
-        local obs2 = Block(175, 120, 20, 20)
-        local obs3 = Block(175, 190, 20, 20)
-        local obs4 = Block(300, 120, 100, 100)
 
-        slimeSprite:moveTo(21, 219)
+        slimeSprite:moveTo(53, 160)
 
     end
 
     if level == 2 then
     
-        local obs1 = Block(200, 40, 25, 25)
-        local obs2 = Block(200, 120, 100, 100)
-        local obs3 = Block(200, 200, 25, 25)
 
-        slimeSprite:moveTo(21, 119)
+        slimeSprite:moveTo(x, y)
 
     end
 
     if level == 3 then
-        slimeSprite:moveTo(200, 120)
+
+        slimeSprite:moveTo(20, 200)
     end
 
 end
@@ -237,9 +259,9 @@ setup()
 
 function playdate.update()
 
+    restart()
     physicsUpdate()
     moveSprite()
     gfx.sprite.update()
-    restart()
 
 end
