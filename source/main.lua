@@ -39,6 +39,7 @@ function spriteSetup()
         --self.debug = Debug(x, y, w, 2)
         self.w = w
         self.grounded = false
+        self.canJump = false
         self.dx = 0
         self.dy = 0
     end
@@ -70,6 +71,13 @@ function physicsUpdate()
         end
     end
 
+    local jumpSprites = slimeSprite.querySpritesInRect(slimeSprite.x + 1, slimeSprite.y + slimeSprite.w, slimeSprite.w - 2, 10)
+    slimeSprite.canJump = false
+    for i = 1, #jumpSprites do
+        if not (jumpSprites[i] == slimeSprite) then
+            slimeSprite.canJump = true
+        end
+    end
     if not (wasGrounded == slimeSprite.grounded) then
         --if slimeSprite.grounded then print('Grounded') else print('Not Grounded') end
     end
@@ -107,7 +115,8 @@ function moveSprite()
     local pSpeed = playerSpeed * dt
     slimeSprite.dx = 0
 
-    if (pd.buttonJustPressed("up") or pd.buttonJustPressed("a") or pd.buttonJustPressed("b")) and slimeSprite.grounded then
+    if (pd.buttonJustPressed("up") or pd.buttonJustPressed("a") or pd.buttonJustPressed("b")) and (slimeSprite.grounded or slimeSprite.canJump) then
+        if not slimeSprite.grounded then print('Ghost Jump!') end
         slimeSprite.dy = -jumpForce
         slimeSprite:moveWithCollisions(math.floor(slimeSprite.x), math.ceil(slimeSprite.y + slimeSprite.dy))
     end
