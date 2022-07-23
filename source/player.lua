@@ -27,6 +27,7 @@ function Player:init(imageTable, x, y, w)
     self:setCollideRect(0, 1, self.w, self.w)
     self:setTag(1)
     self:setCenter(0,0)
+    self:moveTo(x, y)
 
 end
 
