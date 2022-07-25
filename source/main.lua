@@ -10,15 +10,9 @@ import "level"
 
 local pd <const> = playdate
 local gfx <const> = pd.graphics
-local player = nil
-local slimeTable = gfx.imagetable.new("images/slime")
-local spawnX, spawnY, current
+local current
 
 math.randomseed(pd.getSecondsSinceEpoch())
-
-function spawnPlayer(x, y)
-    player = Player(slimeTable, x, y, 15)
-end
 
 function restart()
     if pd.buttonIsPressed("down") and pd.buttonJustPressed("b") then
@@ -28,8 +22,7 @@ function restart()
 end
 
 function initialize()
-    spawnX, spawnY, current = level()
-    spawnPlayer(spawnX, spawnY)
+    current = level()
 end
 
 initialize()

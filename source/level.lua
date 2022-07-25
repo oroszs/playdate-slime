@@ -2,15 +2,25 @@ import "CoreLibs/sprites"
 import "CoreLibs/object"
 import "CoreLibs/graphics"
 import "obstacles"
+import "player"
 
 local pd = playdate
 local gfx = pd.graphics
+local slimeTable = gfx.imagetable.new("images/slime")
 
 function scroll(level)
     local speed = 1
     for i in pairs(level) do
-        if level[i]:getTag() == 2 then
+        if level[i]:getTag() == 2 or (level[i]:getTag() == 1 and level[i].grounded) then
             level[i]:moveTo(level[i].x - speed, level[i].y)
+            local sprites = level[i]:overlappingSprites()
+            for i = 1, #sprites do
+                if sprites[i]:getTag() == 1 then
+                    print('overlap!')
+                    local p = sprites[i]
+                    p:moveTo(p.x - 1, p.y)
+                end
+            end
         end
     end
 end
@@ -64,13 +74,14 @@ function level()
     end
 
     if level == 2 then
+
         walls()
 
-        currentLevel.b1 = Block(300, 100, 100, 100)
-        currentLevel.b1:setTag(2)
+        currentLevel.player = Player(slimeTable, 100, 100, 15)
 
-        x = 100
-        y = 100
+        currentLevel.b1 = Block(300, 200, 100, 100)
+        currentLevel.b1:setTag(2)
+        
     end
 
     if level == 3 then
@@ -79,7 +90,7 @@ function level()
         y = 200
     end
 
-    return x, y, currentLevel
+    return currentLevel
 
 end
 

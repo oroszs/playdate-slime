@@ -54,8 +54,9 @@ function groundCheck(spr)
         end
     end
 
+
     if not (wasGrounded == spr.grounded) then
-        --if slimeSprite.grounded then print('Grounded') else print('Not Grounded') end
+        if spr.grounded then print('Grounded') else print('Not Grounded') end
     end
 
 end
