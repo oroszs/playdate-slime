@@ -16,7 +16,6 @@ function scroll(level)
             local sprites = level[i]:overlappingSprites()
             for i = 1, #sprites do
                 if sprites[i]:getTag() == 1 then
-                    print('overlap!')
                     local p = sprites[i]
                     p:moveTo(p.x - 1, p.y)
                 end
@@ -76,7 +75,6 @@ function level()
     if level == 2 then
 
         walls()
-
         currentLevel.player = Player(slimeTable, 100, 100, 15)
 
         currentLevel.b1 = Block(300, 200, 100, 100)

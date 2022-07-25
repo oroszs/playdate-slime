@@ -2,15 +2,34 @@ import "CoreLibs/object"
 import "CoreLibs/graphics"
 import "CoreLibs/sprites"
 
-class('Player').extends(AnimatedSprite)
 
 local pd = playdate
 local gfx = pd.graphics
 local lt = pd.getCurrentTimeMilliseconds()
 
+class('Aim').extends(gfx.sprite)
+
+function Aim:init(x, y, r)
+    Aim.super.init(self)
+    self.arc = pd.geometry.arc.new(0, 0, r, 0, 359.9)
+    self.r = r
+    local img = gfx.image.new(30, 30)
+    gfx.pushContext(img)
+        gfx.fillCircleInRect(0, 0, 5, 5)
+    gfx.popContext()
+    self:setImage(img)
+    self:setCenter(0, 0)
+    self:add()
+end
+
+class('Player').extends(AnimatedSprite)
+
 function Player:init(imageTable, x, y, w)
 
     Player.super.init(self, imageTable)
+
+    self.aim = Aim(x, y, 5)
+
 
     self.speed = 10
     self.grav = 2
@@ -31,10 +50,14 @@ function Player:init(imageTable, x, y, w)
 
 end
 
+function Player:moveWithCollisions(x, y)
+    local ax, ay, cols, len = Player.super.moveWithCollisions(self, x, y)
+    self.aim:moveTo(ax + 5, ay - 10)
+end
+
 function Player:update()
 
     Player.super.update(self)
-
     local dt = deltaTime(lt)
     groundCheck(self)
     jumpCheck(self, 10)
@@ -43,6 +66,7 @@ function Player:update()
     move(self, dt)
 
 end
+
 
 function groundCheck(spr)
     local collSprites = spr.querySpritesInRect(spr.x + 1, spr.y + spr.w, spr.w - 2, 2)

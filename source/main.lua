@@ -12,6 +12,7 @@ local pd <const> = playdate
 local gfx <const> = pd.graphics
 local current
 
+
 math.randomseed(pd.getSecondsSinceEpoch())
 
 function restart()
@@ -30,5 +31,5 @@ initialize()
 function playdate.update()
     restart()
     gfx.sprite.update()
-    scroll(current)
+    --scroll(current)
 end
