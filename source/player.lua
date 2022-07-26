@@ -11,7 +11,6 @@ class('Aim').extends(gfx.sprite)
 
 function Aim:init(x, y, r)
     Aim.super.init(self)
-    self.arc = pd.geometry.arc.new(0, 0, r, 0, 359.9)
     self.r = r
     local img = gfx.image.new(30, 30)
     gfx.pushContext(img)
@@ -28,10 +27,10 @@ function Player:init(imageTable, x, y, w)
 
     Player.super.init(self, imageTable)
 
-    self.aim = Aim(x, y, 5)
+    self.aim = Aim(x, y, 30)
 
-
-    self.speed = 10
+    self.aimVec = nil
+    self.speed = 2
     self.grav = 2
     self.fallSpeed = 15
     self.jumpForce = 10
@@ -50,9 +49,14 @@ function Player:init(imageTable, x, y, w)
 
 end
 
-function Player:moveWithCollisions(x, y)
-    local ax, ay, cols, len = Player.super.moveWithCollisions(self, x, y)
-    self.aim:moveTo(ax + 5, ay - 10)
+function getPos(ax, ay, r)
+    local pArc = pd.geometry.arc.new(ax, ay, r, 0, 359.9)
+    local len = pArc:length()
+    local cp = pd.getCrankPosition()
+    local amt = cp / 360
+    local dist = amt * len
+    local pos = pArc:pointOnArc(dist)
+    return pos
 end
 
 function Player:update()
@@ -64,9 +68,16 @@ function Player:update()
     ceilCheck(self, 4)
     gravity(self, dt)
     move(self, dt)
+    aim(self)
 
 end
 
+function aim(spr)
+    local pos = getPos(spr.x, spr.y, spr.aim.r)
+    local vec = pd.geometry.vector2D.new(pos.x - spr.x, pos.y - spr.y)
+    spr.aimVec = vec:normalized()
+    spr.aim:moveTo(pos.x + 5, pos.y + 10)
+end
 
 function groundCheck(spr)
     local collSprites = spr.querySpritesInRect(spr.x + 1, spr.y + spr.w, spr.w - 2, 2)
@@ -131,12 +142,13 @@ end
 
 function move(spr, dt)
     local pSpeed = spr.speed * dt
-    spr.dx = 0
+    if spr.dx > 0 then spr.dx -= (.2 * dt) else spr.dx = 0 end
 
     if (pd.buttonJustPressed("up") or pd.buttonJustPressed("a") or pd.buttonJustPressed("b")) and (spr.grounded or spr.canJump) then
         if not spr.grounded then print('Ghost Jump!') end
-        spr.dy = -spr.jumpForce
-        spr:moveWithCollisions(math.floor(spr.x), math.ceil(spr.y + spr.dy))
+        spr.dx = spr.aimVec.x * spr.jumpForce
+        spr.dy = spr.aimVec.y * spr.jumpForce
+        spr:moveWithCollisions(math.ceil(spr.x + spr.dx), math.ceil(spr.y + spr.dy))
     end
 
     if (pd.buttonJustReleased("up") or pd.buttonJustReleased("a") or pd.buttonJustReleased("b")) and spr.dy < 0 then
@@ -144,11 +156,11 @@ function move(spr, dt)
     end
 
     if pd.buttonIsPressed("left") then
-        spr.dx = -pSpeed
+        spr.dx -= pSpeed
     end
 
     if pd.buttonIsPressed("right") then
-        spr.dx = pSpeed
+        spr.dx += pSpeed
     end
 
 end
