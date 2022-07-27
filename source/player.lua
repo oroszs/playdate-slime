@@ -65,9 +65,9 @@ function jump(spr)
     ]]
     local jForce
     local weak = 3
-    local medium = 6
-    local strong = 8
-    local max = 12
+    local medium = 5
+    local strong = 7
+    local max = 10
     local chargeFrame = spr:getCurrentFrameIndex()
     if (chargeFrame > 7 and chargeFrame < 11) or (chargeFrame > 21) then jForce = weak
     elseif (chargeFrame > 10 and chargeFrame < 13) or (chargeFrame > 19 and chargeFrame < 22) then jForce = medium

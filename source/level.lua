@@ -11,13 +11,18 @@ local gfx = pd.graphics
 function scroll(level)
     local speed = 1
     for i in pairs(level) do
-        if level[i]:getTag() == 2 or (level[i]:getTag() == 1 and level[i].grounded) then
+        if level[i] and level[i]:getTag() == 2 or (level[i]:getTag() == 1 and level[i].grounded) then
             level[i]:moveTo(level[i].x - speed, level[i].y)
-            local sprites = level[i]:overlappingSprites()
-            for i = 1, #sprites do
-                if sprites[i]:getTag() == 1 then
-                    local p = sprites[i]
-                    p:moveTo(p.x - 1, p.y)
+            if level[i].x < -50 then
+                level[i]:remove()
+                level[i] = nil
+            else
+                local sprites = level[i]:overlappingSprites()
+                for i = 1, #sprites do
+                    if sprites[i]:getTag() == 1 then
+                        local p = sprites[i]
+                        p:moveTo(p.x - 1, p.y)
+                    end
                 end
             end
         end
@@ -81,7 +86,7 @@ function level(player)
         function spawnBlock()
             local blockName = 'block' .. num
             num += 1
-            currentLevel[blockName] = Block(500, 200, 50, 100)
+            currentLevel[blockName] = Block(400, 200, 50, 100)
         end
         
     end

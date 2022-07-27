@@ -10,7 +10,7 @@ import "level"
 
 local pd <const> = playdate
 local gfx <const> = pd.graphics
-local current, player, spawner
+local current, player, spawner, spawned
 local slimeAnim = gfx.imagetable.new("images/slime-anim")
 
 
@@ -26,9 +26,11 @@ end
 function initialize()
     player = Player(slimeAnim, 100, 100, 15)
     current = level(player)
-    local blockTime = 1000
-    spawner = gfx.animator.new(5000, 0, 100)
+    local blockTime = 5000
+    spawner = gfx.animator.new(blockTime, 0, 100)
     spawner.repeatCount = -1
+
+    spawnBlock()
 
 end
 
@@ -38,7 +40,9 @@ function playdate.update()
     restart()
     gfx.sprite.update()
     scroll(current)
-    if spawner:currentValue() > 90 then
+    if spawner:currentValue() < 10 then spawned = false end
+    if spawner:currentValue() > 90 and not spawned then
+        spawned = true
         spawnBlock()
     end
 end
