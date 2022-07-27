@@ -6,7 +6,7 @@ import "player"
 
 local pd = playdate
 local gfx = pd.graphics
-local slimeTable = gfx.imagetable.new("images/slime")
+local slimeAnim = gfx.imagetable.new("images/slime-anim")
 
 function scroll(level)
     local speed = 1
@@ -75,7 +75,7 @@ function level()
     if level == 2 then
 
         walls()
-        currentLevel.player = Player(slimeTable, 100, 100, 15)
+        currentLevel.player = Player(slimeAnim, 100, 100, 15)
 
         currentLevel.b1 = Block(300, 200, 100, 100)
         currentLevel.b1:setTag(2)

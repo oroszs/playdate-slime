@@ -30,17 +30,19 @@ function Player:init(imageTable, x, y, w)
     self.aim = Aim(x, y, 30)
 
     self.aimVec = nil
-    self.speed = 2
+    self.speed = 5
     self.grav = 2
-    self.fallSpeed = 15
-    self.jumpForce = 10
+    self.fallSpeed = 10
+    self.jumpForce = 12
     self.w = w
     self.grounded = false
     self.canJump = false
     self.dx = 0
     self.dy = 0
     self.collisionResponse = "slide"
-    self:addState("Idle", 1, 6, {tickStep = 2})
+    self:addState("Idle", 1, 7, {tickStep = 2})
+    self:addState("Charge", 8, 25, {tickStep = 2})
+    self:addState("Jump", 26, 32, {tickStep = 2, nextAnimation = "Idle"})
     self:playAnimation()
     self:setCollideRect(0, 1, self.w, self.w)
     self:setTag(1)
@@ -86,6 +88,7 @@ function groundCheck(spr)
     for i = 1, #collSprites do
         if not (collSprites[i] == spr) then
             spr.grounded = true
+            spr.dx = 0
         end
     end
 
@@ -136,14 +139,15 @@ function gravity(spr, dt)
         spr.dy = 0
     end
 
-    spr:moveWithCollisions(math.floor(spr.x + spr.dx), math.ceil(spr.y + spr.dy))
+    spr:moveWithCollisions(spr.x + spr.dx, math.ceil(spr.y + spr.dy))
 
 end
 
 function move(spr, dt)
     local pSpeed = spr.speed * dt
-    if spr.dx > 0 then spr.dx -= (.2 * dt) else spr.dx = 0 end
+    local stopSpeed = 0
 
+    --[[
     if (pd.buttonJustPressed("up") or pd.buttonJustPressed("a") or pd.buttonJustPressed("b")) and (spr.grounded or spr.canJump) then
         if not spr.grounded then print('Ghost Jump!') end
         spr.dx = spr.aimVec.x * spr.jumpForce
@@ -154,13 +158,17 @@ function move(spr, dt)
     if (pd.buttonJustReleased("up") or pd.buttonJustReleased("a") or pd.buttonJustReleased("b")) and spr.dy < 0 then
         spr.dy /= 2
     end
-
-    if pd.buttonIsPressed("left") then
-        spr.dx -= pSpeed
+    ]]
+    
+    if pd.buttonJustPressed("up") then
+        spr:changeState("Charge")
     end
 
-    if pd.buttonIsPressed("right") then
-        spr.dx += pSpeed
+    if pd.buttonJustReleased("up") then
+        spr:changeState("Jump")
+        spr.dx = spr.aimVec.x * spr.jumpForce
+        spr.dy = spr.aimVec.y * spr.jumpForce
+        spr:moveWithCollisions(math.ceil(spr.x + spr.dx), math.ceil(spr.y + spr.dy))
     end
 
 end
