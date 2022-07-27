@@ -1,12 +1,12 @@
 import "CoreLibs/sprites"
 import "CoreLibs/object"
 import "CoreLibs/graphics"
+import "CoreLibs/animator"
 import "obstacles"
 import "player"
 
 local pd = playdate
 local gfx = pd.graphics
-local slimeAnim = gfx.imagetable.new("images/slime-anim")
 
 function scroll(level)
     local speed = 1
@@ -42,7 +42,7 @@ function walls(allWalls)
 
 end
 
-function level()
+function level(player)
     local currentLevel = {}
     local num = math.floor(math.random() * 10)
     local level, x, y
@@ -75,10 +75,14 @@ function level()
     if level == 2 then
 
         walls()
-        currentLevel.player = Player(slimeAnim, 100, 100, 15)
+        currentLevel.player = player
+        local num = 0
 
-        currentLevel.b1 = Block(300, 200, 100, 100)
-        currentLevel.b1:setTag(2)
+        function spawnBlock()
+            local blockName = 'block' .. num
+            num += 1
+            currentLevel[blockName] = Block(500, 200, 50, 100)
+        end
         
     end
 

@@ -28,6 +28,7 @@ function Block:init(x, y, w, h)
         local r = 4
         gfx.fillRoundRect(0, 0, w, h, r)
     end
+    self:setTag(2)
 end
 
 class('SmallBlock').extends('Block')

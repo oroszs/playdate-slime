@@ -29,26 +29,57 @@ function Player:init(imageTable, x, y, w)
 
     self.aim = Aim(x, y, 30)
 
-    self.aimVec = nil
-    self.speed = 5
+    self.aimVec = pd.geometry.vector2D.new(0, 0)
+    self.groundSpeed = 2
+    self.airSpeed = 3
     self.grav = 2
     self.fallSpeed = 10
-    self.jumpForce = 12
+    self.jumpForce = 6
     self.w = w
     self.grounded = false
     self.canJump = false
+    self.moveSpeed = 0
     self.dx = 0
     self.dy = 0
     self.collisionResponse = "slide"
-    self:addState("Idle", 1, 7, {tickStep = 2})
-    self:addState("Charge", 8, 25, {tickStep = 2})
+    self:addState("Idle", 1, 7, {tickStep = 2}, true)
     self:addState("Jump", 26, 32, {tickStep = 2, nextAnimation = "Idle"})
-    self:playAnimation()
+    self:addState("Charge", 8, 25, {tickStep = 2, loop = false})
     self:setCollideRect(0, 1, self.w, self.w)
     self:setTag(1)
     self:setCenter(0,0)
     self:moveTo(x, y)
 
+    self.states["Charge"].onAnimationEndEvent = function ()
+		jump(self)
+	end
+
+end
+
+function jump(spr)
+    --[[
+        8 - 10 | 22 - 24 : weak
+        11 - 12 | 20 -21 : medium
+        13 - 14 | 18 - 19 : strong
+        15 - 17 : max
+    ]]
+    local jForce
+    local weak = 3
+    local medium = 6
+    local strong = 8
+    local max = 12
+    local chargeFrame = spr:getCurrentFrameIndex()
+    if (chargeFrame > 7 and chargeFrame < 11) or (chargeFrame > 21) then jForce = weak
+    elseif (chargeFrame > 10 and chargeFrame < 13) or (chargeFrame > 19 and chargeFrame < 22) then jForce = medium
+    elseif (chargeFrame > 12 and chargeFrame < 15) or (chargeFrame > 17 and chargeFrame < 20) then jForce = strong
+    elseif (chargeFrame > 14 and chargeFrame < 18) then jForce = max
+    end
+    print('frame: ', chargeFrame, 'force: ', jForce)
+    spr:changeState("Jump")
+    spr.dx = spr.aimVec.x * jForce
+    spr.dy = spr.aimVec.y * jForce
+
+    if chargeFrame > 21 then spr:moveWithCollisions(spr.x + spr.dx, spr.y + spr.dy) end
 end
 
 function getPos(ax, ay, r)
@@ -139,13 +170,14 @@ function gravity(spr, dt)
         spr.dy = 0
     end
 
-    spr:moveWithCollisions(spr.x + spr.dx, math.ceil(spr.y + spr.dy))
+    --spr:moveWithCollisions(spr.x + spr.dx, math.ceil(spr.y + spr.dy))
 
 end
 
 function move(spr, dt)
-    local pSpeed = spr.speed * dt
-    local stopSpeed = 0
+    local gSpeed = spr.groundSpeed * dt
+    local aSpeed = spr.airSpeed * dt
+    spr.moveSpeed = 0
 
     --[[
     if (pd.buttonJustPressed("up") or pd.buttonJustPressed("a") or pd.buttonJustPressed("b")) and (spr.grounded or spr.canJump) then
@@ -160,15 +192,33 @@ function move(spr, dt)
     end
     ]]
     
-    if pd.buttonJustPressed("up") then
+    if pd.buttonJustPressed("up") and spr.canJump then
         spr:changeState("Charge")
     end
 
-    if pd.buttonJustReleased("up") then
-        spr:changeState("Jump")
-        spr.dx = spr.aimVec.x * spr.jumpForce
-        spr.dy = spr.aimVec.y * spr.jumpForce
-        spr:moveWithCollisions(math.ceil(spr.x + spr.dx), math.ceil(spr.y + spr.dy))
+    if pd.buttonJustReleased("up") and spr.currentState == 'Charge' then
+        jump(spr)
     end
+
+    if pd.buttonIsPressed("left") then
+        if spr.grounded then
+            spr.moveSpeed = -gSpeed
+        else
+            spr.moveSpeed = -aSpeed
+        end
+    end
+
+    if pd.buttonIsPressed("right") then
+        if spr.grounded then
+            spr.moveSpeed = gSpeed
+        else
+            spr.moveSpeed = aSpeed
+        end
+    end
+
+    if spr.currentState == "Charge" then spr.moveSpeed = 0 end
+
+    spr:moveWithCollisions(spr.x + spr.dx + spr.moveSpeed, spr.y + spr.dy)
+
 
 end
