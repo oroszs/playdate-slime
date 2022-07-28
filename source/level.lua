@@ -37,6 +37,7 @@ function walls(allWalls)
 
     local bottomWall = Wall(0, screenHeight - wallWidth, screenWidth, wallWidth)
     bottomWall.type = "Floor"
+    bottomWall:setTag(1)
 
     if allWalls then
         local rightWall = Wall(screenWidth - wallWidth, 0, wallWidth, screenHeight)
@@ -44,6 +45,8 @@ function walls(allWalls)
         local topWall = Wall(0, 0, screenWidth, wallWidth)
         topWall.type = "Ceiling"
     end
+
+    return bottomWall
 
 end
 
@@ -79,15 +82,38 @@ function level(player)
 
     if level == 2 then
 
-        walls()
+        local floor = walls()
         currentLevel.player = player
+        currentLevel.floor = floor
         local num = 0
 
         function spawnBlock()
             local blockName = 'block' .. num
             num += 1
-            currentLevel[blockName] = Block(400, 200, 50, 100)
+
+            local choice = math.floor(math.random() * 4)
+            local y, h
+            if choice == 0 then
+                y = 200
+                h = 100
+            elseif choice == 1 then
+                y = 175
+                h = 125
+            elseif choice == 2 then
+                y = 150
+                h = 150
+            elseif choice == 3 then
+                y = 125
+                h = 175
+            end
+
+            currentLevel[blockName] = Block(400, y, 50, h)
+
+            return num
+
         end
+
+
         
     end
 

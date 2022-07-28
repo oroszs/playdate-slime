@@ -33,7 +33,7 @@ function Player:init(imageTable, x, y, w)
     self.groundSpeed = 2
     self.airSpeed = 5
     self.grav = 2
-    self.fallSpeed = 10
+    self.fallSpeed = 8
     self.jumpForce = 6
     self.w = w
     self.grounded = false
