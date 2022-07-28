@@ -31,7 +31,7 @@ function Player:init(imageTable, x, y, w)
 
     self.aimVec = pd.geometry.vector2D.new(0, 0)
     self.groundSpeed = 2
-    self.airSpeed = 3
+    self.airSpeed = 5
     self.grav = 2
     self.fallSpeed = 10
     self.jumpForce = 6
@@ -58,25 +58,25 @@ end
 
 function jump(spr)
     --[[
-        8 - 10 | 22 - 24 : weak
-        11 - 12 | 20 -21 : medium
+        8 | 24 : weak
+        9 - 12 | 20 - 23 : medium
         13 - 14 | 18 - 19 : strong
         15 - 17 : max
     ]]
     local jForce
-    local weak = 3
-    local medium = 5
-    local strong = 7
-    local max = 10
+    local weak = 6
+    local medium = 8
+    local strong = 10
+    local max = 12
     local chargeFrame = spr:getCurrentFrameIndex()
-    if (chargeFrame > 7 and chargeFrame < 11) or (chargeFrame > 21) then jForce = weak
-    elseif (chargeFrame > 10 and chargeFrame < 13) or (chargeFrame > 19 and chargeFrame < 22) then jForce = medium
+    if (chargeFrame > 7 and chargeFrame < 9) or (chargeFrame > 23) then jForce = weak
+    elseif (chargeFrame > 8 and chargeFrame < 13) or (chargeFrame > 19 and chargeFrame < 24) then jForce = medium
     elseif (chargeFrame > 12 and chargeFrame < 15) or (chargeFrame > 17 and chargeFrame < 20) then jForce = strong
     elseif (chargeFrame > 14 and chargeFrame < 18) then jForce = max
     end
     print('frame: ', chargeFrame, 'force: ', jForce)
     spr:changeState("Jump")
-    spr.dx = spr.aimVec.x * jForce
+    spr.dx = spr.aimVec.x * (jForce / 1.5)
     spr.dy = spr.aimVec.y * jForce
 
     if chargeFrame > 21 then spr:moveWithCollisions(spr.x + spr.dx, spr.y + spr.dy) end
@@ -120,6 +120,7 @@ function groundCheck(spr)
         if not (collSprites[i] == spr) then
             spr.grounded = true
             spr.dx = 0
+            spr.y = collSprites[i].y - spr.w
         end
     end
 
