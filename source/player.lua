@@ -31,7 +31,7 @@ function Player:init(imageTable, x, y, w)
 
     self.aimVec = pd.geometry.vector2D.new(0, 0)
     self.groundSpeed = 2
-    self.airSpeed = 5
+    self.airSpeed = 4
     self.grav = 2
     self.fallSpeed = 8
     self.jumpForce = 6

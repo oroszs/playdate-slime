@@ -91,7 +91,7 @@ function level(player)
             local blockName = 'block' .. num
             num += 1
 
-            local choice = math.floor(math.random() * 4)
+            local choice = math.floor(math.random() * 5)
             local y, h
             if choice == 0 then
                 y = 200
@@ -105,6 +105,9 @@ function level(player)
             elseif choice == 3 then
                 y = 125
                 h = 175
+            elseif choice == 4 then
+                y = 225
+                h = 75
             end
 
             currentLevel[blockName] = Block(400, y, 50, h)
