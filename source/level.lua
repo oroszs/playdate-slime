@@ -95,24 +95,22 @@ function level(player)
             local y, h
             if choice == 0 then
                 y = 200
-                h = 100
+                h = 50
             elseif choice == 1 then
                 y = 175
-                h = 125
+                h = 75
             elseif choice == 2 then
                 y = 150
-                h = 150
+                h = 100
             elseif choice == 3 then
                 y = 125
-                h = 175
+                h = 125
             elseif choice == 4 then
                 y = 225
-                h = 75
+                h = 25
             end
 
             currentLevel[blockName] = Block(400, y, 50, h)
-
-            return num
 
         end
 

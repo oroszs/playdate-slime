@@ -28,7 +28,7 @@ function Player:init(imageTable, x, y, w)
     Player.super.init(self, imageTable)
 
     self.aim = Aim(x, y, 30)
-
+    self.alive = true
     self.aimVec = pd.geometry.vector2D.new(0, 0)
     self.groundSpeed = 2
     self.airSpeed = 4
@@ -42,6 +42,7 @@ function Player:init(imageTable, x, y, w)
     self.dx = 0
     self.dy = 0
     self.collisionResponse = "slide"
+    self.score = 0
     self:addState("Idle", 1, 7, {tickStep = 2}, true)
     self:addState("Jump", 26, 32, {tickStep = 2, nextAnimation = "Idle"})
     self:addState("Charge", 8, 25, {tickStep = 2, loop = false})
@@ -96,13 +97,22 @@ function Player:update()
 
     Player.super.update(self)
     local dt = deltaTime(lt)
+    if self.alive then
+    aliveCheck(self)
     groundCheck(self)
     jumpCheck(self, 10)
     ceilCheck(self, 4)
     gravity(self, dt)
     move(self, dt)
     aim(self)
+    end
 
+end
+
+function aliveCheck(spr)
+    if spr.x < -20 or spr.y > 260 then
+        spr.alive = false
+    end
 end
 
 function aim(spr)
@@ -121,6 +131,12 @@ function groundCheck(spr)
             spr.grounded = true
             spr.dx = 0
             spr.y = collSprites[i].y - spr.w
+            if collSprites[i].type == 'Block' then
+                if collSprites[i].cleared == false then
+                    collSprites[i].cleared = true
+                    spr.score += 1
+                end
+            end
         end
     end
 

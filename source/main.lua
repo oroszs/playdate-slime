@@ -24,7 +24,6 @@ function restart()
 end
 
 function initialize()
-    score = 1
     player = Player(slimeAnim, 100, 100, 15)
     current = level(player)
     local blockTime = 5000
@@ -40,11 +39,17 @@ initialize()
 function playdate.update()
     restart()
     gfx.sprite.update()
-    scroll(current)
+    if player.alive then
+        scroll(current)
+        gfx.drawText(player.score, 375, 25)
+    else
+        gfx.drawText('Game Over', 155, 50)
+        gfx.drawText(player.score, 200, 25)
+        gfx.drawText('Hold Down and Press B to Restart', 75, 75)
+    end
     if spawner:currentValue() < 10 then spawned = false end
     if spawner:currentValue() > 90 and not spawned then
         spawned = true
-        score = spawnBlock()
+        spawnBlock()
     end
-    gfx.drawText(score, 375, 25)
 end

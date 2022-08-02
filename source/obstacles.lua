@@ -24,9 +24,14 @@ class('Block').extends('Wall')
 function Block:init(x, y, w, h)
     Block.super.init(self, x, y, w, h)
     self.type = "Block"
+    self.cleared = false
     function self:draw()
         local r = 4
-        gfx.fillRoundRect(0, 0, w, h, r)
+        if not self.cleared then
+            gfx.drawRoundRect(0, 0, w, h, r)
+        else
+            gfx.fillRoundRect(0, 0, w, h, r)
+        end
     end
     self:setTag(2)
 end
