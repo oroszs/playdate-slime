@@ -55,6 +55,8 @@ function Player:init(imageTable, x, y, w)
 		jump(self)
 	end
 
+    aim(self)
+
 end
 
 function jump(spr)
@@ -75,7 +77,6 @@ function jump(spr)
     elseif (chargeFrame > 12 and chargeFrame < 15) or (chargeFrame > 17 and chargeFrame < 20) then jForce = strong
     elseif (chargeFrame > 14 and chargeFrame < 18) then jForce = max
     end
-    print('frame: ', chargeFrame, 'force: ', jForce)
     spr:changeState("Jump")
     spr.dx = spr.aimVec.x * (jForce / 1.5)
     spr.dy = spr.aimVec.y * jForce
@@ -87,6 +88,9 @@ function getPos(ax, ay, r)
     local pArc = pd.geometry.arc.new(ax, ay, r, 0, 359.9)
     local len = pArc:length()
     local cp = pd.getCrankPosition()
+    if cp > 70 and cp <= 180 then cp = 70
+    elseif cp > 180 and cp < 290 then cp = 290
+    end
     local amt = cp / 360
     local dist = amt * len
     local pos = pArc:pointOnArc(dist)
@@ -97,7 +101,7 @@ function Player:update()
 
     Player.super.update(self)
     local dt = deltaTime(lt)
-    if self.alive then
+    if self.alive and not pd.isCrankDocked() then
     aliveCheck(self)
     groundCheck(self)
     jumpCheck(self, 10)
@@ -110,7 +114,7 @@ function Player:update()
 end
 
 function aliveCheck(spr)
-    if spr.x < -20 or spr.y > 260 then
+    if spr.x < -30 or spr.y > 260 then
         spr.alive = false
     end
 end
@@ -140,11 +144,11 @@ function groundCheck(spr)
         end
     end
 
-
+--[[
     if not (wasGrounded == spr.grounded) then
         if spr.grounded then print('Grounded') else print('Not Grounded') end
     end
-
+]]
 end
 
 function jumpCheck(spr, collSize)

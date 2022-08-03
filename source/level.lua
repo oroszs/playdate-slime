@@ -111,6 +111,7 @@ function level(player)
             end
 
             currentLevel[blockName] = Block(400, y, 50, h)
+            print('Block Spawned!')
 
         end
 

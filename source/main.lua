@@ -3,6 +3,7 @@ import "CoreLibs/graphics"
 import "CoreLibs/sprites"
 import "CoreLibs/timer"
 import "CoreLibs/animation"
+import "CoreLibs/ui"
 import "libraries/AnimatedSprite"
 import "obstacles"
 import "player"
@@ -10,46 +11,85 @@ import "level"
 
 local pd <const> = playdate
 local gfx <const> = pd.graphics
-local current, player, spawner, spawned, score
+local current, player, score, crankUI, spawnTimer, spawning
 local slimeAnim = gfx.imagetable.new("images/slime-anim")
 
 
 math.randomseed(pd.getSecondsSinceEpoch())
 
+function pause()
+    gfx.fillRect(0, 0, 400, 240)
+    gfx.setImageDrawMode(gfx.kDrawModeFillWhite)
+    gfx.setLineWidth(5)
+    gfx.drawTextInRect('Paused', 165, 120, 75, 50)
+    gfx.setImageDrawMode(gfx.kDrawModeFillBlack)
+    gfx.setLineWidth(1)
+end
+
 function restart()
     if pd.buttonIsPressed("down") and pd.buttonJustPressed("b") then
         gfx.sprite.removeAll()
+        spawnTimer:remove()
         initialize()
     end
 end
 
 function initialize()
+
     player = Player(slimeAnim, 100, 100, 15)
     current = level(player)
-    local blockTime = 5000
-    spawner = gfx.animator.new(blockTime, 0, 100)
-    spawner.repeatCount = -1
 
-    spawnBlock()
+    spawnTimer = pd.timer.keyRepeatTimerWithDelay(5000, 5000, spawnBlock)
+
+    if pd.isCrankDocked() then
+        crankUI = true
+        pause()
+        pd.ui.crankIndicator:start()
+        spawnTimer:pause()
+        spawning = false
+    else
+        crankUI = false
+        spawning = true
+    end
 
 end
 
 initialize()
 
 function playdate.update()
+    pd.timer.updateTimers()
     restart()
     gfx.sprite.update()
     if player.alive then
-        scroll(current)
-        gfx.drawText(player.score, 375, 25)
+        if not pd.isCrankDocked() then
+            if crankUI then
+                crankUI = false
+            end
+            if not spawning then
+                spawning = true
+                spawnTimer:start()
+            end
+            scroll(current)
+            gfx.drawText(player.score, 375, 12)
+        else
+            if not crankUI then
+                pd.ui.crankIndicator:start()
+                crankUI = true
+            end
+            if spawning then
+                spawning = false
+                spawnTimer:pause()
+            end
+            pause()
+            pd.ui.crankIndicator:update()
+        end
     else
-        gfx.drawText('Game Over', 155, 50)
-        gfx.drawText(player.score, 200, 25)
+        if spawning then
+            spawning = false
+            spawnTimer:pause()
+        end
+        gfx.drawText('Game Over', 161, 50)
+        gfx.drawText(player.score, 197, 25)
         gfx.drawText('Hold Down and Press B to Restart', 75, 75)
-    end
-    if spawner:currentValue() < 10 then spawned = false end
-    if spawner:currentValue() > 90 and not spawned then
-        spawned = true
-        spawnBlock()
     end
 end
