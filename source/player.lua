@@ -88,8 +88,10 @@ function getPos(ax, ay, r)
     local pArc = pd.geometry.arc.new(ax, ay, r, 0, 359.9)
     local len = pArc:length()
     local cp = pd.getCrankPosition()
-    if cp > 70 and cp <= 180 then cp = 70
-    elseif cp > 180 and cp < 290 then cp = 290
+    if cp > 70 and cp <= 110 then cp = 70
+    elseif cp > 110 and cp <= 180 then cp = 180 - cp
+    elseif cp > 180 and cp <= 250 then cp = 360 - (cp - 180)
+    elseif cp > 250 and cp <= 290 then cp = 290
     end
     local amt = cp / 360
     local dist = amt * len
@@ -191,27 +193,12 @@ function gravity(spr, dt)
         spr.dy = 0
     end
 
-    --spr:moveWithCollisions(spr.x + spr.dx, math.ceil(spr.y + spr.dy))
-
 end
 
 function move(spr, dt)
     local gSpeed = spr.groundSpeed * dt
     local aSpeed = spr.airSpeed * dt
     spr.moveSpeed = 0
-
-    --[[
-    if (pd.buttonJustPressed("up") or pd.buttonJustPressed("a") or pd.buttonJustPressed("b")) and (spr.grounded or spr.canJump) then
-        if not spr.grounded then print('Ghost Jump!') end
-        spr.dx = spr.aimVec.x * spr.jumpForce
-        spr.dy = spr.aimVec.y * spr.jumpForce
-        spr:moveWithCollisions(math.ceil(spr.x + spr.dx), math.ceil(spr.y + spr.dy))
-    end
-
-    if (pd.buttonJustReleased("up") or pd.buttonJustReleased("a") or pd.buttonJustReleased("b")) and spr.dy < 0 then
-        spr.dy /= 2
-    end
-    ]]
     
     if pd.buttonJustPressed("up") and spr.canJump then
         spr:changeState("Charge")
