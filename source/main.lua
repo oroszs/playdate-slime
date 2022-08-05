@@ -25,7 +25,7 @@ function pause()
 end
 
 function restart()
-    if pd.buttonIsPressed("down") and pd.buttonJustPressed("b") then
+    if pd.buttonJustPressed("a") or pd.buttonJustPressed("b") then
         gfx.sprite.removeAll()
         spawnTimer:remove()
         initialize()
@@ -56,7 +56,6 @@ initialize()
 
 function playdate.update()
     pd.timer.updateTimers()
-    restart()
     gfx.sprite.update()
     if player.alive then
         if not pd.isCrankDocked() then
@@ -88,6 +87,7 @@ function playdate.update()
         end
         gfx.drawText('Game Over', 161, 50)
         gfx.drawText(player.score, 197, 25)
-        gfx.drawText('Hold Down and Press B to Restart', 75, 75)
+        gfx.drawText('Press A or B to Restart', 110, 75)
+        restart()
     end
 end
