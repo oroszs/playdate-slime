@@ -68,9 +68,7 @@ function level(player)
             if choice > 6 then choice = 6
             elseif choice < 0 then choice = 0
             end
-            print(choice)
         end
-        print('sanitized choice: ', choice)
         local blockName = 'block' .. num
         num += 1
 
