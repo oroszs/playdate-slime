@@ -20,10 +20,8 @@ math.randomseed(pd.getSecondsSinceEpoch())
 function pause()
     gfx.fillRect(0, 0, 400, 240)
     gfx.setImageDrawMode(gfx.kDrawModeFillWhite)
-    gfx.setLineWidth(5)
-    gfx.drawTextInRect('Paused', 165, 120, 75, 50)
+    gfx.drawTextInRect('*Paused*', 165, 120, 75, 50)
     gfx.setImageDrawMode(gfx.kDrawModeFillBlack)
-    gfx.setLineWidth(1)
 end
 
 function restart()
