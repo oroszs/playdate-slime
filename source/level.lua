@@ -63,15 +63,12 @@ function level(player)
     function spawnBlock()
 
         if not first then
-            local adjustment = math.floor(math.random() * 5)
-            adjustment -= 2
+            local adjustment = math.floor(math.random() * 3) - 1
             choice += adjustment
-            print('raw choice: ', choice)
-            if choice < 0 then
-                choice = math.floor(math.random() * 3)
-            elseif choice > 4 then
-                choice = 4 + (math.floor(math.random() * 3) * -1)
+            if choice > 6 then choice = 6
+            elseif choice < 0 then choice = 0
             end
+            print(choice)
         end
         print('sanitized choice: ', choice)
         local blockName = 'block' .. num
@@ -80,20 +77,26 @@ function level(player)
         local y, h
 
         if choice == 0 then
-            y = 200
-            h = 50
-        elseif choice == 1 then
-            y = 175
-            h = 75
-        elseif choice == 2 then
-            y = 150
-            h = 100
-        elseif choice == 3 then
-            y = 125
-            h = 125
-        elseif choice == 4 then
             y = 225
             h = 25
+        elseif choice == 1 then
+            y = 200
+            h = 50
+        elseif choice == 2 then
+            y = 175
+            h = 75
+        elseif choice == 3 then
+            y = 150
+            h = 100
+        elseif choice == 4 then
+            y = 125
+            h = 125
+        elseif choice == 5 then
+            y = 100
+            h = 150
+        elseif choice == 6 then
+            y = 75
+            h = 175
         end
         currentLevel[blockName] = Block(400, y, 50, h)
         first = false
