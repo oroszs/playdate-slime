@@ -52,77 +52,51 @@ end
 
 function level(player)
     local currentLevel = {}
-    local num = math.floor(math.random() * 10)
-    local level, x, y
+    local floor = walls()
+    currentLevel.player = player
+    currentLevel.floor = floor
+    local num = 0
+    local choice = math.floor(math.random() * 3)
+    local first = true
 
-    if num < 3 then
-        level = 1
-    elseif num > 2 and num < 6 then
-        level = 2
-    elseif num > 5 then
-        level = 3
-    end
 
-    level = 2
+    function spawnBlock()
 
-    if level == 1 then
-        bg()
-        walls(true)
-        local b1 = BigBlock(27, 177)
-        local b3 = SmallBlock(207, 167)
-        local b32 = Block(287, 127, 25, 65)
-        local b4 = Block(347, 99, 25, 93)
-        local b6 = Block(207, 47, 105, 25)
-        local b7 = Block(127, 87, 25, 105)
-        local b8 = Block(-5, 47, 67, 25)
-        local b9 = Block(-5, 127, 27, 25)
-        x = 53
-        y = 160
-    end
-
-    if level == 2 then
-
-        local floor = walls()
-        currentLevel.player = player
-        currentLevel.floor = floor
-        local num = 0
-
-        function spawnBlock()
-            local blockName = 'block' .. num
-            num += 1
-
-            local choice = math.floor(math.random() * 5)
-            local y, h
-            if choice == 0 then
-                y = 200
-                h = 50
-            elseif choice == 1 then
-                y = 175
-                h = 75
-            elseif choice == 2 then
-                y = 150
-                h = 100
-            elseif choice == 3 then
-                y = 125
-                h = 125
-            elseif choice == 4 then
-                y = 225
-                h = 25
+        if not first then
+            local adjustment = math.floor(math.random() * 5)
+            adjustment -= 2
+            choice += adjustment
+            print('raw choice: ', choice)
+            if choice < 0 then
+                choice = math.floor(math.random() * 3)
+            elseif choice > 4 then
+                choice = 4 + (math.floor(math.random() * 3) * -1)
             end
-
-            currentLevel[blockName] = Block(400, y, 50, h)
-            print('Block Spawned!')
-
         end
+        print('sanitized choice: ', choice)
+        local blockName = 'block' .. num
+        num += 1
 
+        local y, h
 
-        
-    end
-
-    if level == 3 then
-        walls()
-        x = 200
-        y = 200
+        if choice == 0 then
+            y = 200
+            h = 50
+        elseif choice == 1 then
+            y = 175
+            h = 75
+        elseif choice == 2 then
+            y = 150
+            h = 100
+        elseif choice == 3 then
+            y = 125
+            h = 125
+        elseif choice == 4 then
+            y = 225
+            h = 25
+        end
+        currentLevel[blockName] = Block(400, y, 50, h)
+        first = false
     end
 
     return currentLevel
