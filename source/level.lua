@@ -13,6 +13,10 @@ function scroll(level)
     for i in pairs(level) do
         if level[i] and level[i]:getTag() == 2 or (level[i]:getTag() == 1 and level[i].grounded) then
             level[i]:moveTo(level[i].x - speed, level[i].y)
+            if (level[i].type == 'spikeWall' and level[i].x < level.player.x) and not level[i].cleared then
+                level.player.score += 1
+                level[i].cleared = true
+            end
             if level[i].x < -50 then
                 level[i]:remove()
                 level[i] = nil
@@ -70,33 +74,29 @@ function level(player)
             end
         end
         local blockName = 'block' .. num
+        local spikeWallName = 'spikeWall' .. num
         num += 1
 
-        local y, h
+        local y
 
         if choice == 0 then
             y = 225
-            h = 25
         elseif choice == 1 then
             y = 200
-            h = 50
         elseif choice == 2 then
             y = 175
-            h = 75
         elseif choice == 3 then
             y = 150
-            h = 100
         elseif choice == 4 then
             y = 125
-            h = 125
         elseif choice == 5 then
             y = 100
-            h = 150
         elseif choice == 6 then
             y = 75
-            h = 175
         end
-        currentLevel[blockName] = Block(400, y, 50, h)
+
+        currentLevel[blockName] = Block(400, y, 50, 250 - y)
+        currentLevel[spikeWallName] = SpikeWall(485, y)
         first = false
     end
 
