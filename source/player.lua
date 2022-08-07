@@ -104,13 +104,16 @@ function Player:update()
     Player.super.update(self)
     local dt = deltaTime(lt)
     if self.alive and not pd.isCrankDocked() then
-    aliveCheck(self)
-    groundCheck(self)
-    jumpCheck(self, 10)
-    ceilCheck(self, 4)
-    gravity(self, dt)
-    move(self, dt)
-    aim(self)
+        aliveCheck(self)
+        groundCheck(self)
+        jumpCheck(self, 10)
+        ceilCheck(self, 4)
+        gravity(self, dt)
+        move(self, dt)
+        aim(self)
+    end
+    if not self.alive then
+        self.aim:remove()
     end
 
 end
@@ -226,7 +229,14 @@ function move(spr, dt)
 
     if spr.currentState == "Charge" then spr.moveSpeed = 0 end
 
-    spr:moveWithCollisions(spr.x + spr.dx + spr.moveSpeed, spr.y + spr.dy)
+    local ax, ay, colls, len = spr:moveWithCollisions(spr.x + spr.dx + spr.moveSpeed, spr.y + spr.dy)
+
+    for i = 1, #colls do
+        if colls[i].other:getTag() == 4 then
+            spr.alive = false
+            spr:remove()
+        end
+    end
 
 
 end

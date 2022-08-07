@@ -54,7 +54,7 @@ function SpikeWall:init(x, y)
     self.type = 'spikeWall'
     self.cleared = false
     self.top = Block(x, -10, 25, y - 100)
-    self.bottom = Block(x, y - 25, 25, 250 - y + 25)
+    self.bottom = Block(x, y - 50, 25, 250 - y + 50)
     self.top:setTag(4)
     self.bottom:setTag(4)
     SpikeWall.super.init(self)
@@ -68,7 +68,7 @@ end
 function SpikeWall:update()
     local spr = self
     self.top:moveTo(spr.x, -10)
-    self.bottom:moveTo(spr.x, spr.y - 25)
+    self.bottom:moveTo(spr.x, spr.y - 50)
     if self.cleared then
         self.top.cleared = true
         self.bottom.cleared = true
