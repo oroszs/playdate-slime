@@ -1,6 +1,7 @@
 import "CoreLibs/object"
 import "CoreLibs/graphics"
 import "CoreLibs/sprites"
+import "CoreLibs/easing"
 
 local gfx = playdate.graphics
 
@@ -36,16 +37,30 @@ function Block:init(x, y, w, h)
     self:setTag(2)
 end
 
-class('SmallBlock').extends('Block')
+class('MovingBlock').extends('Block')
 
-function SmallBlock:init(x, y)
-    SmallBlock.super.init(self, x, y, 25, 25)
+function MovingBlock:init(x, y, w, h, t, d)
+    MovingBlock.super.init(self, x, y, w, h)
+    local top = y - d
+    local bottom = y + d
+    if top < 75 then top = 75 end
+    if bottom > 225 then bottom = 225 end
+    local dir = math.floor(math.random() * 2)
+    if dir == 0 then
+        self.startVal = top
+        self.endVal = bottom
+    else
+        self.startVal = bottom
+        self.endVal = top
+    end
+    self.moveAnim = gfx.animator.new(t, self.startVal, self.endVal, playdate.easingFunctions.inOutCubic)
+    self.moveAnim.repeatCount = -1
+    self.moveAnim.reverses = true
+    self:moveTo(x, self.startVal)
 end
 
-class('BigBlock').extends('Block')
-
-function BigBlock:init(x, y)
-    BigBlock.super.init(self, x, y, 75, 75)
+function MovingBlock:update()
+    self:moveTo(self.x, self.moveAnim:currentValue())
 end
 
 class('SpikeWall').extends(gfx.sprite)

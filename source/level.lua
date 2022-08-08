@@ -7,6 +7,7 @@ import "player"
 
 local pd = playdate
 local gfx = pd.graphics
+local moving = false
 
 function scroll(level)
     local speed = 1
@@ -25,7 +26,11 @@ function scroll(level)
                 for i = 1, #sprites do
                     if sprites[i]:getTag() == 1 then
                         local p = sprites[i]
-                        p:moveTo(p.x - 1, p.y)
+                        if p.x < level[i].x then
+                            p:moveTo(p.x - 1, p.y)
+                        elseif p.y < level[i].y then
+                            p:moveTo(p.x, p.y - 1)
+                        end
                     end
                 end
             end
@@ -63,7 +68,6 @@ function level(player)
     local choice = math.floor(math.random() * 3)
     local first = true
 
-
     function spawnBlock()
 
         if not first then
@@ -75,6 +79,7 @@ function level(player)
         end
         local blockName = 'block' .. num
         local spikeWallName = 'spikeWall' .. num
+        local movingBlockName = 'movingBlock' .. num
         num += 1
 
         local y
@@ -95,7 +100,16 @@ function level(player)
             y = 75
         end
 
-        currentLevel[blockName] = Block(400, y, 50, 250 - y)
+        local moveCheck = math.floor(math.random() * 2)
+
+        if moveCheck == 0 and not moving then
+            moving = true
+            currentLevel[movingBlockName] = MovingBlock(400, y, 50, 250 - y + 50, 3000, 50)
+        else
+            currentLevel[blockName] = Block(400, y, 50, 250 - y)
+            moving = false
+        end
+
         currentLevel[spikeWallName] = SpikeWall(485, y)
         first = false
     end
