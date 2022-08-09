@@ -23,13 +23,11 @@ function scroll(level)
                 level[i] = nil
             else
                 local sprites = level[i]:overlappingSprites()
-                for i = 1, #sprites do
-                    if sprites[i]:getTag() == 1 then
-                        local p = sprites[i]
+                for j = 1, #sprites do
+                    if sprites[j]:getTag() == 1 then
+                        local p = sprites[j]
                         if p.x < level[i].x then
-                            p:moveTo(p.x - 1, p.y)
-                        elseif p.y < level[i].y then
-                            p:moveTo(p.x, p.y - 1)
+                            p:moveTo(p.x - speed, p.y)
                         end
                     end
                 end
@@ -100,11 +98,12 @@ function level(player)
             y = 75
         end
 
-        local moveCheck = math.floor(math.random() * 2)
+        local moveCheck = 0
+        --math.floor(math.random() * 2)
 
         if moveCheck == 0 and not moving then
             moving = true
-            currentLevel[movingBlockName] = MovingBlock(400, y, 50, 250 - y + 50, 3000, 50)
+            currentLevel[movingBlockName] = MovingBlock(400, y, 50, 250 - y + 50, 5000, 50)
         else
             currentLevel[blockName] = Block(400, y, 50, 250 - y)
             moving = false

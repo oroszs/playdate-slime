@@ -6,6 +6,7 @@ import "CoreLibs/sprites"
 local pd = playdate
 local gfx = pd.graphics
 local lt = pd.getCurrentTimeMilliseconds()
+local collSize = 2
 
 class('Aim').extends(gfx.sprite)
 
@@ -132,7 +133,7 @@ function aim(spr)
 end
 
 function groundCheck(spr)
-    local collSprites = spr.querySpritesInRect(spr.x + 1, spr.y + spr.w, spr.w - 2, 2)
+    local collSprites = spr.querySpritesInRect(spr.x, spr.y + spr.w, spr.w, 2)
     local wasGrounded = spr.grounded
     spr.grounded = false
     for i = 1, #collSprites do
@@ -140,7 +141,7 @@ function groundCheck(spr)
             spr.grounded = true
             spr.dx = 0
             spr.y = collSprites[i].y - spr.w
-            if collSprites[i].type == 'Block' then
+            if collSprites[i].type == 'Block' or collSprites[i].type == 'MovingBlock' then
                 if collSprites[i].cleared == false then
                     collSprites[i].cleared = true
                     spr.score += 1
@@ -229,7 +230,7 @@ function move(spr, dt)
 
     if spr.currentState == "Charge" then spr.moveSpeed = 0 end
 
-    local ax, ay, colls, len = spr:moveWithCollisions(spr.x + spr.dx + spr.moveSpeed, spr.y + spr.dy)
+    local ax, ay, colls, len = spr:moveWithCollisions(spr.x + spr.dx, spr.y + spr.dy)
 
     for i = 1, #colls do
         if colls[i].other:getTag() == 4 then

@@ -41,6 +41,9 @@ class('MovingBlock').extends('Block')
 
 function MovingBlock:init(x, y, w, h, t, d)
     MovingBlock.super.init(self, x, y, w, h)
+    self.on = false
+    self.w = w
+    self.player = nil
     local top = y - d
     local bottom = y + d
     if top < 75 then top = 75 end
@@ -49,9 +52,11 @@ function MovingBlock:init(x, y, w, h, t, d)
     if dir == 0 then
         self.startVal = top
         self.endVal = bottom
+        self.dir = 1
     else
         self.startVal = bottom
         self.endVal = top
+        self.dir = -1
     end
     self.moveAnim = gfx.animator.new(t, self.startVal, self.endVal, playdate.easingFunctions.inOutCubic)
     self.moveAnim.repeatCount = -1
@@ -60,7 +65,32 @@ function MovingBlock:init(x, y, w, h, t, d)
 end
 
 function MovingBlock:update()
-    self:moveTo(self.x, self.moveAnim:currentValue())
+    MovingBlock.super.update(self)
+    print('dir: ', self.dir)
+    if self.moveAnim:ended() then
+        self.dir *= -1
+        print(self.dir)
+    end
+    self.on = false
+    local cur = self.moveAnim:currentValue()
+    local sprites = self.querySpritesInRect(self.x, self.y - 2, self.w, 2)
+    for i = 1, #sprites do
+        if sprites[i]:getTag() == 1 then
+            self.on = true
+            self.player = sprites[i]
+        end
+    end
+    if self.on then
+        if self.dir == -1 then
+            self.player:moveWithCollisions(self.player.x, cur - self.player.w)
+            self:moveTo(self.x, cur)
+        else
+            self:moveTo(self.x, cur)
+            self.player:moveWithCollisions(self.player.x, cur - self.player.w)
+        end
+    else
+        self:moveTo(self.x, cur)
+    end
 end
 
 class('SpikeWall').extends(gfx.sprite)
