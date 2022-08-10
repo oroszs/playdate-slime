@@ -41,6 +41,7 @@ class('MovingBlock').extends('Block')
 
 function MovingBlock:init(x, y, w, h, t, d)
     MovingBlock.super.init(self, x, y, w, h)
+    self.type = 'MovingBlock'
     self.on = false
     self.w = w
     self.player = nil
@@ -66,27 +67,25 @@ end
 
 function MovingBlock:update()
     MovingBlock.super.update(self)
-    print('dir: ', self.dir)
-    if self.moveAnim:ended() then
+    if self.moveAnim:currentValue() == self.startVal or self.moveAnim:currentValue() == self.endVal then
         self.dir *= -1
-        print(self.dir)
     end
     self.on = false
     local cur = self.moveAnim:currentValue()
     local sprites = self.querySpritesInRect(self.x, self.y - 2, self.w, 2)
     for i = 1, #sprites do
-        if sprites[i]:getTag() == 1 then
+        if sprites[i]:getTag() == 3 then
             self.on = true
             self.player = sprites[i]
         end
     end
     if self.on then
         if self.dir == -1 then
-            self.player:moveWithCollisions(self.player.x, cur - self.player.w)
+            self.player:moveTo(self.player.x, cur - self.player.w)
             self:moveTo(self.x, cur)
         else
             self:moveTo(self.x, cur)
-            self.player:moveWithCollisions(self.player.x, cur - self.player.w)
+            self.player:moveTo(self.player.x, cur - self.player.w)
         end
     else
         self:moveTo(self.x, cur)
@@ -96,7 +95,7 @@ end
 class('SpikeWall').extends(gfx.sprite)
 
 function SpikeWall:init(x, y)
-    self.type = 'spikeWall'
+    self.type = 'SpikeWall'
     self.cleared = false
     self.top = Block(x, -10, 25, y - 100)
     self.bottom = Block(x, y - 50, 25, 250 - y + 50)

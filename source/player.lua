@@ -44,11 +44,12 @@ function Player:init(imageTable, x, y, w)
     self.dy = 0
     self.collisionResponse = "slide"
     self.score = 0
+    self.jumping = false
     self:addState("Idle", 1, 7, {tickStep = 2}, true)
     self:addState("Jump", 26, 32, {tickStep = 2, nextAnimation = "Idle"})
     self:addState("Charge", 8, 25, {tickStep = 2, loop = false})
     self:setCollideRect(0, 1, self.w, self.w)
-    self:setTag(1)
+    self:setTag(3)
     self:setCenter(0,0)
     self:moveTo(x, y)
 
@@ -81,8 +82,9 @@ function jump(spr)
     spr:changeState("Jump")
     spr.dx = spr.aimVec.x * (jForce / 1.5)
     spr.dy = spr.aimVec.y * jForce
-
-    if chargeFrame > 21 then spr:moveWithCollisions(spr.x + spr.dx, spr.y + spr.dy) end
+    
+    spr:moveTo(spr.x + spr.dx, spr.y + spr.dy)
+    spr.jumping = true
 end
 
 function getPos(ax, ay, r)
@@ -140,7 +142,7 @@ function groundCheck(spr)
         if not (collSprites[i] == spr) then
             spr.grounded = true
             spr.dx = 0
-            spr.y = collSprites[i].y - spr.w
+            if not collSprites[i].type == 'MovingBlock' then spr.y = collSprites[i].y - spr.w end
             if collSprites[i].type == 'Block' or collSprites[i].type == 'MovingBlock' then
                 if collSprites[i].cleared == false then
                     collSprites[i].cleared = true
@@ -200,7 +202,7 @@ function gravity(spr, dt)
 end
 
 function move(spr, dt)
-    local gSpeed = spr.groundSpeed * dt
+    local gSpeed = 0
     local aSpeed = spr.airSpeed * dt
     spr.moveSpeed = 0
     
@@ -230,14 +232,15 @@ function move(spr, dt)
 
     if spr.currentState == "Charge" then spr.moveSpeed = 0 end
 
-    local ax, ay, colls, len = spr:moveWithCollisions(spr.x + spr.dx, spr.y + spr.dy)
-
-    for i = 1, #colls do
-        if colls[i].other:getTag() == 4 then
-            spr.alive = false
-            spr:remove()
+    if not spr.jumping then
+        local ax, ay, colls, len = spr:moveWithCollisions(spr.x + spr.dx + spr.moveSpeed, spr.y + spr.dy)
+        for i = 1, #colls do
+            if colls[i].other:getTag() == 4 then
+                spr.alive = false
+                spr:remove()
+            end
         end
     end
-
+    spr.jumping = false
 
 end

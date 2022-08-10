@@ -5,8 +5,8 @@ import "CoreLibs/timer"
 import "CoreLibs/animation"
 import "CoreLibs/ui"
 import "libraries/AnimatedSprite"
-import "obstacles"
 import "player"
+import "obstacles"
 import "level"
 
 local pd <const> = playdate
@@ -34,7 +34,7 @@ end
 
 function initialize()
 
-    player = Player(slimeAnim, 100, 100, 15)
+    player = Player(slimeAnim, 100, 210, 15)
     current = level(player)
 
     spawnTimer = pd.timer.keyRepeatTimerWithDelay(5000, 5000, spawnBlock)
@@ -85,9 +85,12 @@ function playdate.update()
             spawning = false
             spawnTimer:pause()
         end
+        gfx.setImageDrawMode('fillWhite')
+        gfx.fillRoundRect(100, 15, 200, 85, 5)
         gfx.drawText('Game Over', 161, 50)
         gfx.drawText(player.score, 197, 25)
         gfx.drawText('Press A or B to Restart', 110, 75)
+        gfx.setImageDrawMode('fillBlack')
         restart()
     end
 end

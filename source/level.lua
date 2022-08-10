@@ -12,25 +12,26 @@ local moving = false
 function scroll(level)
     local speed = 1
     for i in pairs(level) do
-        if level[i] and level[i]:getTag() == 2 or (level[i]:getTag() == 1 and level[i].grounded) then
+        if level[i] and level[i]:getTag() == 2 or level[i]:getTag() == 1 or (level[i]:getTag() == 3 and level[i].grounded) then
             level[i]:moveTo(level[i].x - speed, level[i].y)
-            if (level[i].type == 'spikeWall' and level[i].x < level.player.x) and not level[i].cleared then
+            local sprites = level[i]:overlappingSprites()
+            for j = 1, #sprites do
+                if sprites[j]:getTag() == 3 then
+                    local p = sprites[j]
+                    if p.x < level[i].x and (p.y > (level[i].y - p.w - 1)) then
+                        --p:moveTo(p.x - speed, p.y)
+                        p.dx = -3
+                        p.dy = -5
+                    end
+                end
+            end
+            if (level[i].type == 'SpikeWall' and level[i].x < level.player.x) and not level[i].cleared then
                 level.player.score += 1
                 level[i].cleared = true
             end
-            if level[i].x < -50 then
+            if (level[i].x < -50 and not level[i]:getTag() == 1) or (level[i].x < -500 and level[i]:getTag() == 1) then
                 level[i]:remove()
                 level[i] = nil
-            else
-                local sprites = level[i]:overlappingSprites()
-                for j = 1, #sprites do
-                    if sprites[j]:getTag() == 1 then
-                        local p = sprites[j]
-                        if p.x < level[i].x then
-                            p:moveTo(p.x - speed, p.y)
-                        end
-                    end
-                end
             end
         end
     end
@@ -62,9 +63,11 @@ function level(player)
     local floor = walls()
     currentLevel.player = player
     currentLevel.floor = floor
-    local num = 0
+    local num = 1
     local choice = math.floor(math.random() * 3)
     local first = true
+    currentLevel.block0 = Block(85, 225, 50, 250 - 225)
+    currentLevel.block0.type = nil
 
     function spawnBlock()
 
@@ -98,18 +101,19 @@ function level(player)
             y = 75
         end
 
-        local moveCheck = 0
-        --math.floor(math.random() * 2)
+        local moveCheck = math.floor(math.random() * 2)
 
         if moveCheck == 0 and not moving then
             moving = true
-            currentLevel[movingBlockName] = MovingBlock(400, y, 50, 250 - y + 50, 5000, 50)
+            currentLevel[movingBlockName] = MovingBlock(400, y, 50, 250 - y + 50, 3000, 50)
         else
             currentLevel[blockName] = Block(400, y, 50, 250 - y)
             moving = false
         end
 
-        currentLevel[spikeWallName] = SpikeWall(485, y)
+        local spikeCheck = math.floor(math.random() * 5)
+
+        if spikeCheck < 3 then currentLevel[spikeWallName] = SpikeWall(485, y) end
         first = false
     end
 
