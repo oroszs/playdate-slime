@@ -30,6 +30,7 @@ function Player:init(imageTable, x, y, w)
 
     self.aim = Aim(x, y, 30)
     self.alive = true
+    self.hit = false
     self.aimVec = pd.geometry.vector2D.new(0, 0)
     self.groundSpeed = 2
     self.airSpeed = 4
@@ -142,7 +143,9 @@ function groundCheck(spr)
         if not (collSprites[i] == spr) then
             spr.grounded = true
             spr.dx = 0
-            if not collSprites[i].type == 'MovingBlock' then spr.y = collSprites[i].y - spr.w end
+            if not (collSprites[i].type == 'MovingBlock') then
+                spr.y = collSprites[i].y - spr.w
+            end
             if collSprites[i].type == 'Block' or collSprites[i].type == 'MovingBlock' then
                 if collSprites[i].cleared == false then
                     collSprites[i].cleared = true
@@ -238,6 +241,13 @@ function move(spr, dt)
             if colls[i].other:getTag() == 4 then
                 spr.alive = false
                 spr:remove()
+            elseif colls[i].other:getTag() == 2 then
+                if spr.x < colls[i].other.x and (spr.y > (colls[i].other.y - spr.w - 1)) then
+                    spr.dx = -3
+                    spr.dy = -5
+                    spr:moveTo(spr.x + spr.dx, spr.y + spr.dy)
+                    spr.hit = false
+                end
             end
         end
     end

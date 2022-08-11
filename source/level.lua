@@ -14,6 +14,7 @@ function scroll(level)
     for i in pairs(level) do
         if level[i] and level[i]:getTag() == 2 or level[i]:getTag() == 1 or (level[i]:getTag() == 3 and level[i].grounded) then
             level[i]:moveTo(level[i].x - speed, level[i].y)
+            --[[
             local sprites = level[i]:overlappingSprites()
             for j = 1, #sprites do
                 if sprites[j]:getTag() == 3 then
@@ -25,7 +26,8 @@ function scroll(level)
                     end
                 end
             end
-            if (level[i].type == 'SpikeWall' and level[i].x < level.player.x) and not level[i].cleared then
+            ]]
+            if (level[i].type == 'SpikeWall' and level[i].x < level.player.x) and not level[i].cleared and level.player.alive then
                 level.player.score += 1
                 level[i].cleared = true
             end
