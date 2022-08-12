@@ -14,20 +14,7 @@ function scroll(level)
     for i in pairs(level) do
         if level[i] and level[i]:getTag() == 2 or level[i]:getTag() == 1 or (level[i]:getTag() == 3 and level[i].grounded) then
             level[i]:moveTo(level[i].x - speed, level[i].y)
-            --[[
-            local sprites = level[i]:overlappingSprites()
-            for j = 1, #sprites do
-                if sprites[j]:getTag() == 3 then
-                    local p = sprites[j]
-                    if p.x < level[i].x and (p.y > (level[i].y - p.w - 1)) then
-                        --p:moveTo(p.x - speed, p.y)
-                        p.dx = -3
-                        p.dy = -5
-                    end
-                end
-            end
-            ]]
-            if (level[i].type == 'SpikeWall' and level[i].x < level.player.x) and not level[i].cleared and level.player.alive then
+            if (level[i].type == 'SpikeWall' and (level[i].x + level[i].w) < level.player.x) and not level[i].cleared and level.player.alive then
                 level.player.score += 1
                 level[i].cleared = true
             end
@@ -115,7 +102,7 @@ function level(player)
 
         local spikeCheck = math.floor(math.random() * 5)
 
-        if spikeCheck < 3 then currentLevel[spikeWallName] = SpikeWall(485, y) end
+        if spikeCheck < 3 then currentLevel[spikeWallName] = SpikeWall(485, y, 25) end
         first = false
     end
 

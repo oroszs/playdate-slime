@@ -30,13 +30,13 @@ function Player:init(imageTable, x, y, w)
 
     self.aim = Aim(x, y, 30)
     self.alive = true
-    self.hit = false
     self.aimVec = pd.geometry.vector2D.new(0, 0)
-    self.groundSpeed = 2
+    self.acceleration = 1
     self.airSpeed = 4
     self.grav = 2
     self.fallSpeed = 8
     self.jumpForce = 6
+    self.bounceForce = pd.geometry.vector2D.new(5, 7)
     self.w = w
     self.grounded = false
     self.canJump = false
@@ -125,6 +125,7 @@ end
 function aliveCheck(spr)
     if spr.x < -30 or spr.y > 260 then
         spr.alive = false
+        spr:remove()
     end
 end
 
@@ -136,7 +137,7 @@ function aim(spr)
 end
 
 function groundCheck(spr)
-    local collSprites = spr.querySpritesInRect(spr.x, spr.y + spr.w, spr.w, 2)
+    local collSprites = spr.querySpritesInRect(spr.x + 1, spr.y + spr.w, spr.w - 1, 2)
     local wasGrounded = spr.grounded
     spr.grounded = false
     for i = 1, #collSprites do
@@ -146,10 +147,12 @@ function groundCheck(spr)
             if not (collSprites[i].type == 'MovingBlock') then
                 spr.y = collSprites[i].y - spr.w
             end
-            if collSprites[i].type == 'Block' or collSprites[i].type == 'MovingBlock' then
-                if collSprites[i].cleared == false then
-                    collSprites[i].cleared = true
-                    spr.score += 1
+            if (collSprites[i].type == 'Block') or (collSprites[i].type == 'MovingBlock') then
+                if (collSprites[i].y - spr.w + 1) > spr.y then
+                    if collSprites[i].cleared == false then
+                        collSprites[i].cleared = true
+                        spr.score += 1
+                    end
                 end
             end
         end
@@ -205,9 +208,9 @@ function gravity(spr, dt)
 end
 
 function move(spr, dt)
-    local gSpeed = 0
     local aSpeed = spr.airSpeed * dt
-    spr.moveSpeed = 0
+    local accel = spr.acceleration * dt
+    if spr.grounded then spr.moveSpeed = 0 end
     
     if pd.buttonJustPressed("up") and spr.canJump then
         spr:changeState("Charge")
@@ -218,22 +221,23 @@ function move(spr, dt)
     end
 
     if pd.buttonIsPressed("left") then
-        if spr.grounded then
-            spr.moveSpeed = -gSpeed
-        else
-            spr.moveSpeed = -aSpeed
+        spr.moving = true
+        if not spr.grounded then
+            spr.moveSpeed -= accel
+            if spr.moveSpeed < -aSpeed then spr.moveSpeed = -aSpeed end
         end
     end
 
     if pd.buttonIsPressed("right") then
-        if spr.grounded then
-            spr.moveSpeed = gSpeed
-        else
-            spr.moveSpeed = aSpeed
+        spr.moving = true
+        if not spr.grounded then
+            spr.moveSpeed += accel
+            if spr.moveSpeed > aSpeed then spr.moveSpeed = aSpeed end
         end
     end
 
     if spr.currentState == "Charge" then spr.moveSpeed = 0 end
+
 
     if not spr.jumping then
         local ax, ay, colls, len = spr:moveWithCollisions(spr.x + spr.dx + spr.moveSpeed, spr.y + spr.dy)
@@ -242,11 +246,16 @@ function move(spr, dt)
                 spr.alive = false
                 spr:remove()
             elseif colls[i].other:getTag() == 2 then
-                if spr.x < colls[i].other.x and (spr.y > (colls[i].other.y - spr.w - 1)) then
-                    spr.dx = -3
-                    spr.dy = -5
-                    spr:moveTo(spr.x + spr.dx, spr.y + spr.dy)
-                    spr.hit = false
+                if spr.y > (colls[i].other.y - spr.w) then
+                    if spr.x < colls[i].other.x then
+                        spr.dx = -spr.bounceForce.x
+                        spr.dy = -spr.bounceForce.y
+                        spr:moveTo(spr.x + spr.dx, spr.y + spr.dy)
+                    elseif spr.x > colls[i].other.x then
+                        spr.dx = spr.bounceForce.x
+                        spr.dy = -spr.bounceForce.y
+                        spr:moveTo(spr.x + spr.dx, spr.y + spr.dy)
+                    end
                 end
             end
         end

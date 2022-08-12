@@ -94,11 +94,14 @@ end
 
 class('SpikeWall').extends(gfx.sprite)
 
-function SpikeWall:init(x, y)
+function SpikeWall:init(x, y, w)
     self.type = 'SpikeWall'
     self.cleared = false
-    self.top = Block(x, -10, 25, y - 100)
-    self.bottom = Block(x, y - 50, 25, 250 - y + 50)
+    self.w = w
+    self.top = Block(x, -10, w, y - 100)
+    self.top.type = 'Spike'
+    self.bottom = Block(x, y - 50, w, 250 - y + 50)
+    self.bottom.type = 'Spike'
     self.top:setTag(4)
     self.bottom:setTag(4)
     SpikeWall.super.init(self)
