@@ -60,6 +60,8 @@ function Player:init(imageTable, x, y, w)
 
     aim(self)
 
+    jump(self)
+
 end
 
 function jump(spr)
@@ -74,7 +76,8 @@ function jump(spr)
     local medium = 8
     local strong = 10
     local max = 12
-    local chargeFrame = spr:getCurrentFrameIndex()
+    --local chargeFrame = spr:getCurrentFrameIndex()
+    local chargeFrame = 16
     if (chargeFrame > 7 and chargeFrame < 9) or (chargeFrame > 23) then jForce = weak
     elseif (chargeFrame > 8 and chargeFrame < 13) or (chargeFrame > 19 and chargeFrame < 24) then jForce = medium
     elseif (chargeFrame > 12 and chargeFrame < 15) or (chargeFrame > 17 and chargeFrame < 20) then jForce = strong
@@ -137,7 +140,7 @@ function aim(spr)
 end
 
 function groundCheck(spr)
-    local collSprites = spr.querySpritesInRect(spr.x + 1, spr.y + spr.w, spr.w - 1, 2)
+    local collSprites = spr.querySpritesInRect(spr.x, spr.y + spr.w, spr.w, 2)
     local wasGrounded = spr.grounded
     spr.grounded = false
     for i = 1, #collSprites do
@@ -158,15 +161,13 @@ function groundCheck(spr)
         end
     end
 
---[[
     if not (wasGrounded == spr.grounded) then
         if spr.grounded then print('Grounded') else print('Not Grounded') end
     end
-]]
 end
 
 function jumpCheck(spr, collSize)
-    local jumpSprites = spr.querySpritesInRect(spr.x + 1, spr.y + spr.w, spr.w - 2, collSize)
+    local jumpSprites = spr.querySpritesInRect(spr.x, spr.y + spr.w, spr.w, collSize)
     spr.canJump = false
     for i = 1, #jumpSprites do
         if not (jumpSprites[i] == spr) then
