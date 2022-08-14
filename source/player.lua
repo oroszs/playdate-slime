@@ -46,6 +46,7 @@ function Player:init(imageTable, x, y, w)
     self.collisionResponse = "slide"
     self.score = 0
     self.jumping = false
+    self.hit = false
     self:addState("Idle", 1, 7, {tickStep = 2}, true)
     self:addState("Jump", 26, 32, {tickStep = 2, nextAnimation = "Idle"})
     self:addState("Charge", 8, 25, {tickStep = 2, loop = false})
@@ -59,9 +60,6 @@ function Player:init(imageTable, x, y, w)
 	end
 
     aim(self)
-
-    jump(self)
-
 end
 
 function jump(spr)
@@ -208,6 +206,27 @@ function gravity(spr, dt)
 
 end
 
+function bounceCheck(player, other)
+    local hit = false
+    if player.y > (other.y - player.w) then
+        if player.x < other.x then
+            player.dx = -player.bounceForce.x
+            player.dy = -player.bounceForce.y
+            print('before', player.x, player.y)
+            player:moveTo(player.x + player.dx, player.y + player.dy)
+            print('after', player.x, player.y)
+            hit = true
+            print('hit!')
+        elseif player.x > other.x then
+            player.dx = player.bounceForce.x
+            player.dy = -player.bounceForce.y
+            player:moveTo(player.x + player.dx, player.y + player.dy)
+            hit = true
+        end
+    end
+    return hit
+end
+
 function move(spr, dt)
     local aSpeed = spr.airSpeed * dt
     local accel = spr.acceleration * dt
@@ -239,27 +258,33 @@ function move(spr, dt)
 
     if spr.currentState == "Charge" then spr.moveSpeed = 0 end
 
-
     if not spr.jumping then
-        local ax, ay, colls, len = spr:moveWithCollisions(spr.x + spr.dx + spr.moveSpeed, spr.y + spr.dy)
-        for i = 1, #colls do
-            if colls[i].other:getTag() == 4 then
-                spr.alive = false
-                spr:remove()
-            elseif colls[i].other:getTag() == 2 then
-                if spr.y > (colls[i].other.y - spr.w) then
-                    if spr.x < colls[i].other.x then
-                        spr.dx = -spr.bounceForce.x
-                        spr.dy = -spr.bounceForce.y
-                        spr:moveTo(spr.x + spr.dx, spr.y + spr.dy)
-                    elseif spr.x > colls[i].other.x then
-                        spr.dx = spr.bounceForce.x
-                        spr.dy = -spr.bounceForce.y
-                        spr:moveTo(spr.x + spr.dx, spr.y + spr.dy)
-                    end
+        local overlaps
+        local collSize = 8
+        if spr.dx > 0 then
+            overlaps = spr.querySpritesInRect(spr.x + spr.w, spr.y, collSize, spr.w)
+        elseif spr.dx <= 0 then
+            overlaps = spr.querySpritesInRect(spr.x - collSize, spr.y, collSize, spr.w)
+        end
+        if not spr.hit then
+            for j = 1, #overlaps do
+                if overlaps[j]:getTag() == 2 and not spr.hit then
+                    spr.hit = bounceCheck(spr, overlaps[j])
                 end
             end
         end
+        if not spr.hit then
+            local ax, ay, colls, len = spr:moveWithCollisions(spr.x + spr.dx + spr.moveSpeed, spr.y + spr.dy)
+            for i = 1, #colls do
+                if colls[i].other:getTag() == 4 then
+                    spr.alive = false
+                    spr:remove()
+                elseif colls[i].other:getTag() == 2 then
+                    bounceCheck(spr, colls[i].other)
+                end
+            end
+        end
+        spr.hit = false
     end
     spr.jumping = false
 

@@ -55,8 +55,7 @@ function level(player)
     local num = 1
     local choice = math.floor(math.random() * 3)
     local first = true
-    --currentLevel.block0 = Block(85, 225, 50, 250 - 225)
-    currentLevel.block0 = Block(120, 175, 50, 250 - 175)
+    currentLevel.block0 = Block(85, 225, 50, 250 - 225)
     currentLevel.block0.type = nil
 
     function spawnBlock()
