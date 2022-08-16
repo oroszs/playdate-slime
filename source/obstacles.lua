@@ -48,7 +48,7 @@ function MovingBlock:init(x, y, w, h, t, d)
     local top = y - d
     local bottom = y + d
     if top < 75 then top = 75 end
-    if bottom > 225 then bottom = 225 end
+    if bottom > 200 then bottom = 200 end
     local dir = math.floor(math.random() * 2)
     if dir == 0 then
         self.startVal = top
