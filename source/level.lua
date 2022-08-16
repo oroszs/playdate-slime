@@ -68,7 +68,7 @@ function level(player)
         if not first then
             local adjustment = math.floor(math.random() * 3) - 1
             choice += adjustment
-            if choice > 5 then choice = 5
+            if choice > 4 then choice = 4
             elseif choice < 0 then choice = 0
             end
         end
