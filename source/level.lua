@@ -26,36 +26,41 @@ function scroll(level)
     end
 end
 
-function walls(allWalls)
+function floor(first)
     ---screen dimensions: 400 x 240
     local wallWidth = 5
     local screenWidth = 400
     local screenHeight = 240
+    local xVal, yVal
+    local height = 10
 
-    local bottomWall = Wall(0, screenHeight - wallWidth, screenWidth, wallWidth)
-    bottomWall.type = "Floor"
-    bottomWall:setTag(1)
-
-    if allWalls then
-        local rightWall = Wall(screenWidth - wallWidth, 0, wallWidth, screenHeight)
-        local leftWall = Wall(0, 0, wallWidth, screenHeight)
-        local topWall = Wall(0, 0, screenWidth, wallWidth)
-        topWall.type = "Ceiling"
+    if first then
+        xVal = 0
+    else
+        xVal = screenWidth
     end
 
-    return bottomWall
+    yVal = screenHeight - wallWidth - height
+
+    local floorObj = Wall(xVal, yVal, screenWidth, 250 - yVal)
+
+    floorObj.type = "Floor"
+    floorObj:setTag(1)
+
+    return floorObj
 
 end
 
 function level(player)
     local currentLevel = {}
-    local floor = walls()
     currentLevel.player = player
-    currentLevel.floor = floor
+    currentLevel.floor0 = floor(true)
+    currentLevel.floor1 = floor(false)
     local num = 1
-    local choice = math.floor(math.random() * 3)
+    local choice = math.floor(math.random() * 2)
     local first = true
-    currentLevel.block0 = Block(85, 225, 50, 250 - 225)
+    local yVal = 200
+    currentLevel.block0 = Block(85, yVal, 50, 250 - yVal)
     currentLevel.block0.type = nil
 
     function spawnBlock()
@@ -63,7 +68,7 @@ function level(player)
         if not first then
             local adjustment = math.floor(math.random() * 3) - 1
             choice += adjustment
-            if choice > 6 then choice = 6
+            if choice > 5 then choice = 5
             elseif choice < 0 then choice = 0
             end
         end
@@ -75,18 +80,14 @@ function level(player)
         local y
 
         if choice == 0 then
-            y = 225
-        elseif choice == 1 then
-            y = 200
-        elseif choice == 2 then
             y = 175
-        elseif choice == 3 then
+        elseif choice == 1 then
             y = 150
-        elseif choice == 4 then
+        elseif choice == 2 then
             y = 125
-        elseif choice == 5 then
+        elseif choice == 3 then
             y = 100
-        elseif choice == 6 then
+        elseif choice == 4 then
             y = 75
         end
 

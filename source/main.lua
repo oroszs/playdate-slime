@@ -34,7 +34,7 @@ end
 
 function initialize()
 
-    player = Player(slimeAnim, 100, 210, 15)
+    player = Player(slimeAnim, 100, 185, 15)
     current = level(player)
 
     spawnTimer = pd.timer.keyRepeatTimerWithDelay(5000, 5000, spawnBlock)

@@ -36,7 +36,7 @@ function Player:init(imageTable, x, y, w)
     self.grav = 2
     self.fallSpeed = 8
     self.jumpForce = 6
-    self.bounceForce = pd.geometry.vector2D.new(5, 7)
+    self.bounceForce = pd.geometry.vector2D.new(3, 5)
     self.w = w
     self.grounded = false
     self.canJump = false
