@@ -15,6 +15,15 @@ local current, player, score, crankUI, spawnTimer, spawning
 local slimeAnim = gfx.imagetable.new("images/slime-anim")
 local gameState = 'Menu'
 
+local leader = pd.datastore.read('leaderboard')
+local tempLeader = {}
+if not leader then
+    for i = 1, 5 do
+        tempLeader[i] = ('Player-'..0)
+    end
+    pd.datastore.write(tempLeader, 'leaderboard', true)
+    leader = tempLeader
+end
 
 math.randomseed(pd.getSecondsSinceEpoch())
 
@@ -39,7 +48,6 @@ function restart()
     elseif pd.buttonJustPressed('b') then
         gameState = 'Menu'
         clearSprites()
-        mainMenu()
     end
 end
 
@@ -47,6 +55,16 @@ function mainMenu()
     if pd.buttonJustPressed('a') then
         gfx.clear()
         startGame()
+    elseif pd.buttonJustPressed('b') then
+        gameState = 'Leaderboard'
+        gfx.clear()
+    end
+end
+
+function leaderboard()
+    if pd.buttonJustPressed('b') then
+        gameState = 'Menu'
+        gfx.clear()
     end
 end
 
@@ -75,10 +93,26 @@ end
 function playdate.update()
     pd.timer.updateTimers()
     gfx.sprite.update()
+
     if gameState == 'Menu' then
         gfx.drawTextAligned('*Slime Climb*', 200, 25, kTextAlignment.center)
         gfx.drawTextAligned('A - Start', 200, 120, kTextAlignment.center)
+        gfx.drawTextAligned('B - Leaderboard', 200, 145, kTextAlignment.center)
         mainMenu()
+    elseif gameState == 'Leaderboard' then
+        local scoreFont = gfx.font.new('fonts/Roobert/Roobert-10-Bold')
+        local titleFont = gfx.font.new('fonts/Roobert/Roobert-24-Medium')
+        local subTitleFont = gfx.font.new('fonts/Roobert/Roobert-11-Medium')
+        titleFont:drawTextAligned('High Scores', 200, 10, kTextAlignment.center)
+        for i = 1, #leader do
+            local index = string.find(leader[i], '-')
+            local name = string.sub(leader[i], 1, index - 1)
+            local score = string.sub(leader[i], index + 1)
+            local string = (i..'. '..name..' - '..score)
+            scoreFont:drawTextAligned(string, 200, (50 + (i * 20)), kTextAlignment.center)
+        end
+        subTitleFont:drawTextAligned('B - Main Menu', 200, 200, kTextAlignment.center)
+        leaderboard()
     elseif gameState == 'Game' then
         if player.alive then
             if not pd.isCrankDocked() then
