@@ -47,6 +47,7 @@ function Player:init(imageTable, x, y, w)
     self.score = 0
     self.jumping = false
     self.hit = false
+    self.name = 'Sean'
     self:addState("Idle", 1, 7, {tickStep = 2}, true)
     self:addState("Jump", 26, 32, {tickStep = 2, nextAnimation = "Idle"})
     self:addState("Charge", 8, 25, {tickStep = 2, loop = false})

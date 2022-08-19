@@ -4,6 +4,7 @@ import "CoreLibs/sprites"
 import "CoreLibs/timer"
 import "CoreLibs/animation"
 import "CoreLibs/ui"
+import 'CoreLibs/keyboard'
 import "libraries/AnimatedSprite"
 import "player"
 import "obstacles"
@@ -14,6 +15,7 @@ local gfx <const> = pd.graphics
 local current, player, score, crankUI, spawnTimer, spawning
 local slimeAnim = gfx.imagetable.new("images/slime-anim")
 local gameState = 'Menu'
+local newHighScore = false
 
 local leader = pd.datastore.read('leaderboard')
 local tempLeader = {}
@@ -24,6 +26,10 @@ if not leader then
     pd.datastore.write(tempLeader, 'leaderboard', true)
     leader = tempLeader
 end
+
+local highIndex = string.find(leader[1], '-')
+local highestScore = string.sub(leader[1], highIndex + 1)
+highestScore = tonumber(highestScore)
 
 math.randomseed(pd.getSecondsSinceEpoch())
 
@@ -43,9 +49,11 @@ end
 
 function restart()
     if pd.buttonJustPressed("a") then
+        newHighScore = false
         clearSprites()
         startGame()
     elseif pd.buttonJustPressed('b') then
+        newHighScore = false
         gameState = 'Menu'
         clearSprites()
     end
@@ -124,7 +132,11 @@ function playdate.update()
                     spawnTimer:start()
                 end
                 scroll(current)
-                gfx.drawTextAligned(player.score, 200, 25, kTextAlignment.center)
+                local scoreString = player.score
+                if player.score > highestScore then
+                    scoreString = (player.score..' !')
+                end
+                gfx.drawTextAligned(scoreString, 200, 25, kTextAlignment.center)
             else
                 if not crankUI then
                     pd.ui.crankIndicator:start()
@@ -142,9 +154,25 @@ function playdate.update()
                 spawning = false
                 spawnTimer:pause()
             end
+
+            for i = 1, #leader do
+                local index = string.find(leader[i], '-')
+                local score = string.sub(leader[i], index + 1)
+                score = tonumber(score)
+                if player.score > score then
+                    newHighScore = true
+                    leader[i] = player.name..'-'..player.score
+                    pd.datastore.write(leader, 'leaderboard', true)
+                end
+                if newHighScore then break end
+            end
             gfx.setImageDrawMode('fillWhite')
             gfx.fillRoundRect(100, 15, 200, 125, 5)
-            gfx.drawTextAligned('Game Over', 200, 50, kTextAlignment.center)
+            if newHighScore then
+                gfx.drawTextAligned('High Score!', 200, 50, kTextAlignment.center)
+            else
+                gfx.drawTextAligned('Game Over', 200, 50, kTextAlignment.center)
+            end
             gfx.drawTextAligned(player.score, 200, 25, kTextAlignment.center)
             gfx.drawTextAligned('A - Restart', 200, 95, kTextAlignment.center)
             gfx.drawTextAligned('B - Main Menu', 200, 115, kTextAlignment.center)
