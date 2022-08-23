@@ -102,6 +102,12 @@ function startGame()
 
 end
 
+function gameOver()
+    if pd.buttonJustPressed('a') then
+        gameState = 'gameOverLeader'
+    end
+end
+
 
 function playdate.update()
     pd.timer.updateTimers()
@@ -170,7 +176,7 @@ function playdate.update()
                 end
                 if newHighScore then break end
             end
-            gameState = 'GameOver'
+            gameState = 'GameOverMain'
         end
     elseif gameState == 'GameOverMain' then
         roobert_24:drawTextAligned('Game Over', 200, 50, kTextAlignment.center)
