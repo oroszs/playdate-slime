@@ -18,17 +18,21 @@ local gameState = 'Menu'
 local newHighScore = false
 local roobert_10 <const> = gfx.font.new('fonts/Roobert/Roobert-10-Bold')
 local roobert_11 <const> = gfx.font.new('fonts/Roobert/Roobert-11-Medium')
+local roobert_20 <const> = gfx.font.new('fonts/Roobert/Roobert-20-Medium')
 local roobert_24 <const> = gfx.font.new('fonts/Roobert/Roobert-24-Medium')
 
 local leader = pd.datastore.read('leaderboard')
 local tempLeader = {}
---if not leader then
+
+local debug = false
+
+if not leader or debug then
     for i = 1, 5 do
         tempLeader[i] = ('Player-'..0)
     end
     pd.datastore.write(tempLeader, 'leaderboard', true)
     leader = tempLeader
---end
+end
 
 local highIndex, highestScore
 
@@ -104,9 +108,11 @@ end
 
 function gameOver()
     if pd.buttonJustPressed('a') then
+        gfx.clear()
         gameState = 'gameOverLeader'
     end
 end
+
 
 
 function playdate.update()
@@ -179,8 +185,25 @@ function playdate.update()
             gameState = 'GameOverMain'
         end
     elseif gameState == 'GameOverMain' then
-        roobert_24:drawTextAligned('Game Over', 200, 50, kTextAlignment.center)
-        roobert_10:drawTextAligned('A - Continue', 200, 95, kTextAlignment.center)
+
+        if player.score > highestScore then
+            gfx.fillRoundRect(70, 15, 260, 175, 5)
+            gfx.setImageDrawMode(gfx.kDrawModeFillWhite)
+            roobert_11:drawTextAligned('New High Score!', 200, 115, kTextAlignment.center)
+            roobert_10:drawTextAligned('A - Continue', 200, 150, kTextAlignment.center)
+        elseif newHighScore then
+            gfx.fillRoundRect(70, 15, 260, 175, 5)
+            gfx.setImageDrawMode(gfx.kDrawModeFillWhite)
+            roobert_11:drawTextAligned('High Score!', 200, 115, kTextAlignment.center)
+            roobert_10:drawTextAligned('A - Continue', 200, 150, kTextAlignment.center)
+        else
+            gfx.fillRoundRect(100, 15, 200, 125, 5)
+            gfx.setImageDrawMode(gfx.kDrawModeFillWhite)
+            roobert_10:drawTextAligned('A - Continue', 200, 115, kTextAlignment.center)
+        end
+        roobert_24:drawTextAligned('Game Over', 200, 25, kTextAlignment.center)
+        roobert_11:drawTextAligned(player.score, 200, 75, kTextAlignment.center)
+        gfx.setImageDrawMode(gfx.kDrawModeFillBlack)
         gameOver()
     elseif gameState == 'GameOverLeader' then
     elseif gameState == 'GameOverRestart' then
