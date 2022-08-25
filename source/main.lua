@@ -9,6 +9,7 @@ import "libraries/AnimatedSprite"
 import "player"
 import "obstacles"
 import "level"
+import "ui"
 
 local pd <const> = playdate
 local gfx <const> = pd.graphics
@@ -18,65 +19,40 @@ local gameState = 'Menu'
 
 math.randomseed(pd.getSecondsSinceEpoch())
 
-function clearSprites()
-    gfx.sprite.removeAll()
-    if spawnTimer then
-        spawnTimer:remove()
-    end
-end
-
-function restart()
-    if pd.buttonJustPressed("a") then
-        newHighScore = false
-        clearSprites()
-        startGame()
-    elseif pd.buttonJustPressed('b') then
-        newHighScore = false
-        gameState = 'Menu'
-        clearSprites()
-    end
-end
-
-function mainMenu()
-
-end
-
-function leaderboard()
-
-end
-
 function startGame()
     player = Player(slimeAnim, 100, 185, 15)
     current = level(player)
     spawnTimer = pd.timer.keyRepeatTimerWithDelay(5000, 5000, spawnBlock)
-    highIndex = string.find(leader[1], '-')
-    highestScore = string.sub(leader[1], highIndex + 1)
-    highestScore = tonumber(highestScore)
 end
 
-function gameOver()
-    if pd.buttonJustPressed('a') then
-        gfx.clear()
-        gameState = 'gameOverLeader'
+function crankCheck(state)
+    if pd.isCrankDocked() then
+        if not (state == 'Pause') then
+            state = 'Pause'
+            pd.ui.crankIndicator:start()
+            spawnTimer:pause()
+            spawning = false
+        end
+    else
+        if (state == 'Pause') then
+            state = 'Game'
+            spawning = true 
+            spawnTimer:start()
+        end
     end
+    return state
 end
 
 function game()
-    if player.alive then
+    if gameState == 'Game' and player.alive then
+        gameState = crankCheck(gameState)
         scroll(current)
-    else
     end
 end
-
-
 
 function playdate.update()
     pd.timer.updateTimers()
     gfx.sprite.update()
-    
     game()
-
-
-    menu(gameState, player, leader)
-
+    gameState = menu(gameState, player)
 end
