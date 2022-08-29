@@ -13,7 +13,8 @@ import "ui"
 
 local pd <const> = playdate
 local gfx <const> = pd.graphics
-local current, player, score, crankUI, spawnTimer, spawning
+local current, player, score, crankUI, spawnTimer
+local spawning = false
 local slimeAnim = gfx.imagetable.new("images/slime-anim")
 local gameState = 'Menu'
 
@@ -22,7 +23,9 @@ math.randomseed(pd.getSecondsSinceEpoch())
 function startGame()
     player = Player(slimeAnim, 100, 185, 15)
     current = level(player)
-    spawnTimer = pd.timer.keyRepeatTimerWithDelay(5000, 5000, spawnBlock)
+    spawnTimer = pd.timer.new(5000)
+    spawnTimer.repeats = true
+    spawnTimer.timerEndedCallback = spawnBlock
 end
 
 function crankCheck(state)
@@ -36,7 +39,7 @@ function crankCheck(state)
     else
         if (state == 'Pause') then
             state = 'Game'
-            spawning = true 
+            spawning = true
             spawnTimer:start()
         end
     end
@@ -45,8 +48,13 @@ end
 
 function game()
     if gameState == 'Game' and player.alive then
-        gameState = crankCheck(gameState)
         scroll(current)
+    end
+    if (gameState == 'Game') or (gameState == 'Pause') and player.alive then
+        gameState = crankCheck(gameState)
+    end
+    if gameState == 'Game' and not player.alive and spawning then
+        spawnTimer:pause()
     end
 end
 
@@ -55,4 +63,5 @@ function playdate.update()
     gfx.sprite.update()
     game()
     gameState = menu(gameState, player)
+    if spawnTimer then print('current time: ', spawnTimer.currentTime) end
 end

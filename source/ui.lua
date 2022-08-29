@@ -28,10 +28,10 @@ if not leader or debug then
 end
 
 function pause()
-    pd.ui.crankIndicator:update()
     gfx.fillRect(0, 0, 400, 240)
     gfx.setImageDrawMode(gfx.kDrawModeFillWhite)
     roobert_24:drawTextAligned('Paused', 200, 100, kTextAlignment.center)
+    pd.ui.crankIndicator:update()
     gfx.setImageDrawMode(gfx.kDrawModeFillBlack)
 end
 
@@ -43,7 +43,6 @@ function clearSprites()
 end
 
 function menu(state, player)
-    print(state)
     if state == 'Menu' then
 
         roobert_24:drawTextAligned('Slime Climb', 200, 25, kTextAlignment.center)
@@ -84,7 +83,6 @@ function menu(state, player)
         pause()
     elseif state == 'Game' then
         if player.alive then
-            state = crankCheck('Game')
             local scoreString = player.score
             if player.score > highestScore then
                 scoreString = (player.score..' !')

@@ -64,7 +64,7 @@ function level(player)
     currentLevel.block0.type = nil
 
     function spawnBlock()
-
+        print('Spawned!')
         if not first then
             local adjustment = math.floor(math.random() * 3) - 1
             choice += adjustment
