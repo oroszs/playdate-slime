@@ -17,7 +17,7 @@ local newHighScore = false
 local leader = pd.datastore.read('leaderboard')
 local tempLeader = {}
 
-local debug = true
+local debug = false
 
 if not leader or debug then
     for i = 1, 5 do
@@ -40,6 +40,33 @@ function clearSprites()
     if spawnTimer then
         spawnTimer:remove()
     end
+end
+
+function showLeaderboard(center, player)
+    local w = 150
+    local h = 152
+    local r = 5
+    local x = center - (w / 2)
+    local y = 5
+    gfx.fillRoundRect(x, y, w, h, r)
+    gfx.setImageDrawMode(gfx.kDrawModeFillWhite)
+    for i = 1, #leader do
+        if i == newHighScoreIndex then
+            local input = pd.keyboard.text
+            if string.len(input) > 10 then
+                input = string.sub(input, 1, 10)
+                pd.keyboard.text = input
+            end
+            roobert_10:drawTextAligned(i..'. '..input..' - '..player.score, center, (i * 25), kTextAlignment.center)
+        else
+            local index = string.find(leader[i], '-')
+            local name = string.sub(leader[i], 1, index - 1)
+            local score = string.sub(leader[i], index + 1)
+            local string = (i..'. '..name..' - '..score)
+            roobert_10:drawTextAligned(string, center, (i * 25), kTextAlignment.center)
+        end
+    end
+    gfx.setImageDrawMode(gfx.kDrawModeFillBlack)
 end
 
 function menu(state, player, spawnTimer)
@@ -132,38 +159,39 @@ function menu(state, player, spawnTimer)
                 pd.keyboard.show(player.name)
             end
             state = 'GameOverLeader'
-            gfx.clear()
         end
     elseif state == 'GameOverLeader' then
         local center, xVal
         if newHighScore then
-            center = 215 / 2
-            xVal = 25
+            center = 110
         else
-            xVal = 115
             center = 200
         end
-        gfx.fillRoundRect(xVal, 15, 170, 195, 5)
-        gfx.setImageDrawMode(gfx.kDrawModeFillWhite)
-        for i = 1, #leader do
-            if i == newHighScoreIndex then
-                local input = pd.keyboard.text
-                if string.len(input) > 10 then
-                    input = string.sub(input, 1, 10)
-                    pd.keyboard.text = input
-                end
-                roobert_10:drawTextAligned(i..'. '..input..' - '..player.score, center, 10 + (i * 31), kTextAlignment.center)
-            else
-                local index = string.find(leader[i], '-')
-                local name = string.sub(leader[i], 1, index - 1)
-                local score = string.sub(leader[i], index + 1)
-                local string = (i..'. '..name..' - '..score)
-                roobert_10:drawTextAligned(string, center, 10 + (i * 31), kTextAlignment.center)
+        showLeaderboard(center, player)
+        function saveName(saved)
+            if saved then
+                leader[newHighScoreIndex] = pd.keyboard.text..'-'..player.score
+                player.name = pd.keyboard.text
+                pd.datastore.write(pd.keyboard.text, 'playerName', true)
             end
+            newHighScoreIndex = nil
+            pd.datastore.write(leader, 'leaderboard', true)
         end
-        gfx.setImageDrawMode(gfx.kDrawModeFillBlack)
+        pd.keyboard.keyboardWillHideCallback = saveName
+        if not newHighScore and pd.buttonJustPressed('a') or (newHighScoreIndex == nil) then
+            state = 'GameOverRestart'
+        end
     elseif state == 'GameOverRestart' then
+        showLeaderboard(200, player)
+        local w = 150
+        local h = 55
+        gfx.fillRoundRect(200 - (w / 2), 220 - h, w, h, 5)
+        gfx.setImageDrawMode(gfx.kDrawModeFillWhite)
+        roobert_10:drawTextAligned('A - Quick Restart', 200, 176, kTextAlignment.center)
+        roobert_10:drawTextAligned('B - Main Menu', 200, 196, kTextAlignment.center)
+        gfx.setImageDrawMode(gfx.kDrawModeFillBlack)
         if pd.buttonJustPressed("a") then
+            state = 'Game'
             newHighScore = false
             clearSprites()
             startGame()
