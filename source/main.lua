@@ -26,6 +26,7 @@ function startGame()
     spawnTimer = pd.timer.new(5000)
     spawnTimer.repeats = true
     spawnTimer.timerEndedCallback = spawnBlock
+    spawnBlock()
 end
 
 function crankCheck(state)
@@ -53,15 +54,12 @@ function game()
     if (gameState == 'Game') or (gameState == 'Pause') and player.alive then
         gameState = crankCheck(gameState)
     end
-    if gameState == 'Game' and not player.alive and spawning then
-        spawnTimer:pause()
-    end
 end
 
 function playdate.update()
     pd.timer.updateTimers()
     gfx.sprite.update()
     game()
-    gameState = menu(gameState, player)
+    gameState = menu(gameState, player, spawnTimer)
     if spawnTimer then print('current time: ', spawnTimer.currentTime) end
 end

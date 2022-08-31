@@ -42,7 +42,7 @@ function clearSprites()
     end
 end
 
-function menu(state, player)
+function menu(state, player, spawnTimer)
     if state == 'Menu' then
 
         roobert_24:drawTextAligned('Slime Climb', 200, 25, kTextAlignment.center)
@@ -89,10 +89,7 @@ function menu(state, player)
             end
             roobert_11:drawTextAligned(scoreString, 200, 25, kTextAlignment.center)
         else
-            if spawning then
-                spawning = false
-                spawnTimer:pause()
-            end
+            spawnTimer:pause()
             for i = 1, #leader do
                 local index = string.find(leader[i], '-')
                 local score = string.sub(leader[i], index + 1)
