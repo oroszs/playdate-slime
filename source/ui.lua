@@ -89,15 +89,6 @@ function menu(state, player, spawnTimer)
     elseif state == 'Leaderboard' then
 
         roobert_24:drawTextAligned('High Scores', 200, 5, kTextAlignment.center)
-        --[[
-        for i = 1, #leader do
-            local index = string.find(leader[i], '-')
-            local name = string.sub(leader[i], 1, index - 1)
-            local score = string.sub(leader[i], index + 1)
-            local string = (i..'. '..name..' - '..score)
-            roobert_10:drawTextAligned(string, 200, (50 + (i * 20)), kTextAlignment.center)
-        end
-        ]]
 
         showLeaderboard(200, 50, player)
 
@@ -116,7 +107,13 @@ function menu(state, player, spawnTimer)
             if player.score > highestScore then
                 scoreString = (player.score..' !')
             end
+            local w = 40
+            local h = 40
+            gfx.setImageDrawMode(gfx.kDrawModeFillBlack)
+            gfx.fillRoundRect((200 - w / 2), 15, w, h, 5)
+            gfx.setImageDrawMode(gfx.kDrawModeFillWhite)
             roobert_11:drawTextAligned(scoreString, 200, 25, kTextAlignment.center)
+            gfx.setImageDrawMode(gfx.kDrawModeFillBlack)
         else
             spawnTimer:pause()
             for i = 1, #leader do
