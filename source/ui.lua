@@ -42,12 +42,11 @@ function clearSprites()
     end
 end
 
-function showLeaderboard(center, player)
+function showLeaderboard(center, y, player)
     local w = 150
     local h = 152
     local r = 5
     local x = center - (w / 2)
-    local y = 5
     gfx.fillRoundRect(x, y, w, h, r)
     gfx.setImageDrawMode(gfx.kDrawModeFillWhite)
     for i = 1, #leader do
@@ -57,13 +56,13 @@ function showLeaderboard(center, player)
                 input = string.sub(input, 1, 10)
                 pd.keyboard.text = input
             end
-            roobert_10:drawTextAligned(i..'. '..input..' - '..player.score, center, (i * 25), kTextAlignment.center)
+            roobert_10:drawTextAligned(i..'. '..input..' - '..player.score, center, (y - 7) + (i * 25), kTextAlignment.center)
         else
             local index = string.find(leader[i], '-')
             local name = string.sub(leader[i], 1, index - 1)
             local score = string.sub(leader[i], index + 1)
             local string = (i..'. '..name..' - '..score)
-            roobert_10:drawTextAligned(string, center, (i * 25), kTextAlignment.center)
+            roobert_10:drawTextAligned(string, center, (y - 7) + (i * 25), kTextAlignment.center)
         end
     end
     gfx.setImageDrawMode(gfx.kDrawModeFillBlack)
@@ -89,8 +88,8 @@ function menu(state, player, spawnTimer)
         end
     elseif state == 'Leaderboard' then
 
-        roobert_24:drawTextAligned('High Scores', 200, 10, kTextAlignment.center)
-
+        roobert_24:drawTextAligned('High Scores', 200, 5, kTextAlignment.center)
+        --[[
         for i = 1, #leader do
             local index = string.find(leader[i], '-')
             local name = string.sub(leader[i], 1, index - 1)
@@ -98,8 +97,11 @@ function menu(state, player, spawnTimer)
             local string = (i..'. '..name..' - '..score)
             roobert_10:drawTextAligned(string, 200, (50 + (i * 20)), kTextAlignment.center)
         end
+        ]]
 
-        roobert_11:drawTextAligned('B - Main Menu', 200, 200, kTextAlignment.center)
+        showLeaderboard(200, 50, player)
+
+        roobert_11:drawTextAligned('B - Main Menu', 200, 215, kTextAlignment.center)
 
         if pd.buttonJustPressed('b') then
             state = 'Menu'
@@ -167,7 +169,7 @@ function menu(state, player, spawnTimer)
         else
             center = 200
         end
-        showLeaderboard(center, player)
+        showLeaderboard(center, 5, player)
         function saveName(saved)
             if saved then
                 leader[newHighScoreIndex] = pd.keyboard.text..'-'..player.score
@@ -182,7 +184,7 @@ function menu(state, player, spawnTimer)
             state = 'GameOverRestart'
         end
     elseif state == 'GameOverRestart' then
-        showLeaderboard(200, player)
+        showLeaderboard(200, 5, player)
         local w = 150
         local h = 55
         gfx.fillRoundRect(200 - (w / 2), 220 - h, w, h, 5)
