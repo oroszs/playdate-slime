@@ -123,10 +123,14 @@ function menu(state, player, spawnTimer)
         roobert_24:drawTextAligned('High Scores', 200, 5, kTextAlignment.center)
 
         showLeaderboard(200, 50, player)
-
-        roobert_11:drawTextAligned('B - Main Menu', 200, 215, kTextAlignment.center)
-
-        if pd.buttonJustPressed('b') then
+        gfx.setImageDrawMode(gfx.kDrawModeFillBlack)
+        w = 105
+        h = 25
+        gfx.fillRoundRect((200 - w / 2), 212, w, h, 5)
+        gfx.setImageDrawMode(gfx.kDrawModeFillWhite)
+        roobert_11:drawTextAligned('Main Menu', 200, 215, kTextAlignment.center)
+        gfx.setImageDrawMode(gfx.kDrawModeFillBlack)
+        if pd.buttonJustPressed('a') then
             state = 'Menu'
             gfx.clear()
         end    
