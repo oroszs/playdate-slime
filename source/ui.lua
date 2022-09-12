@@ -18,6 +18,7 @@ local leader = pd.datastore.read('leaderboard')
 local tempLeader = {}
 
 local debug = false
+local select = 1
 
 if not leader or debug then
     for i = 1, 5 do
@@ -70,19 +71,50 @@ end
 
 function menu(state, player, spawnTimer)
     if state == 'Menu' then
-
+        local w = 200
+        local h = 50
+        gfx.setImageDrawMode(gfx.kDrawModeFillBlack)
+        gfx.fillRoundRect((200 - w / 2), 15, w, h, 5)
+        gfx.setImageDrawMode(gfx.kDrawModeFillWhite)
         roobert_24:drawTextAligned('Slime Climb', 200, 25, kTextAlignment.center)
-        roobert_11:drawTextAligned('A - Start', 200, 120, kTextAlignment.center)
-        roobert_11:drawTextAligned('B - Leaderboard', 200, 145, kTextAlignment.center)
+        if select == 1 then
+            gfx.setImageDrawMode(gfx.kDrawModeFillBlack)
+            w = 60
+            h = 25
+            gfx.fillRoundRect((200 - w / 2), 117, w, h, 5)
+            gfx.setImageDrawMode(gfx.kDrawModeFillWhite)
+            roobert_11:drawTextAligned('Start', 200, 120, kTextAlignment.center)
+            gfx.setImageDrawMode(gfx.kDrawModeFillBlack)
+            roobert_11:drawTextAligned('Leaderboard', 200, 145, kTextAlignment.center)
+        elseif select == 2 then
+            gfx.setImageDrawMode(gfx.kDrawModeFillBlack)
+            roobert_11:drawTextAligned('Start', 200, 120, kTextAlignment.center)
+            w = 125
+            h = 25
+            gfx.fillRoundRect((200 - w / 2), 142, w, h, 5)
+            gfx.setImageDrawMode(gfx.kDrawModeFillWhite)
+            roobert_11:drawTextAligned('Leaderboard', 200, 145, kTextAlignment.center)
+        end
+        gfx.setImageDrawMode(gfx.kDrawModeFillBlack)
 
-        if pd.buttonJustPressed('a') then
+        if pd.buttonJustPressed('down') then
+            gfx.clear()
+            select -= 1
+        elseif pd.buttonJustPressed('up') then
+            gfx.clear()
+            select += 1
+        end
+        if select < 1 then select = 2
+        elseif select > 2 then select = 1
+        end
+        if pd.buttonJustPressed('a') and select == 1 then
             startGame()
             highIndex = string.find(leader[1], '-')
             highestScore = string.sub(leader[1], highIndex + 1)
             highestScore = tonumber(highestScore)
             state = 'Game'
             gfx.clear()
-        elseif pd.buttonJustPressed('b') then
+        elseif pd.buttonJustPressed('a') and select == 2 then
             state = 'Leaderboard'
             gfx.clear()
         end
