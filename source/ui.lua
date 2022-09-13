@@ -43,6 +43,26 @@ function clearSprites()
     end
 end
 
+function borderText(w, h, borderY, stringY, fontSize, string)
+    gfx.setImageDrawMode(gfx.kDrawModeFillBlack)
+    gfx.fillRoundRect((200 - w / 2), borderY, w, h, 5)
+    gfx.setImageDrawMode(gfx.kDrawModeFillWhite)
+    if fontSize == 11 then
+        roobert_11:drawTextAligned(string, 200, stringY, kTextAlignment.center)
+    elseif fontSize == 24 then
+        roobert_24:drawTextAligned(string, 200, stringY, kTextAlignment.center)
+    end
+    gfx.setImageDrawMode(gfx.kDrawModeFillBlack)
+end
+
+function plainText(y, fontSize, string)
+    if fontSize == 11 then
+        roobert_11:drawTextAligned(string, 200, y, kTextAlignment.center)
+    elseif fontSize == 24 then
+        roobert_24:drawTextAligned(string, 200, y, kTextAlignment.center)
+    end
+end
+
 function showLeaderboard(center, y, player)
     local w = 150
     local h = 152
@@ -71,32 +91,14 @@ end
 
 function menu(state, player, spawnTimer)
     if state == 'Menu' then
-        local w = 200
-        local h = 50
-        gfx.setImageDrawMode(gfx.kDrawModeFillBlack)
-        gfx.fillRoundRect((200 - w / 2), 15, w, h, 5)
-        gfx.setImageDrawMode(gfx.kDrawModeFillWhite)
-        roobert_24:drawTextAligned('Slime Climb', 200, 25, kTextAlignment.center)
+        borderText(200, 50, 15, 25, 24, 'Slime Climb')
         if select == 1 then
-            gfx.setImageDrawMode(gfx.kDrawModeFillBlack)
-            w = 60
-            h = 25
-            gfx.fillRoundRect((200 - w / 2), 117, w, h, 5)
-            gfx.setImageDrawMode(gfx.kDrawModeFillWhite)
-            roobert_11:drawTextAligned('Start', 200, 120, kTextAlignment.center)
-            gfx.setImageDrawMode(gfx.kDrawModeFillBlack)
-            roobert_11:drawTextAligned('Leaderboard', 200, 145, kTextAlignment.center)
+            borderText(60, 25, 117, 120, 11, 'Start')
+            plainText(145, 11, 'Leaderboard')
         elseif select == 2 then
-            gfx.setImageDrawMode(gfx.kDrawModeFillBlack)
-            roobert_11:drawTextAligned('Start', 200, 120, kTextAlignment.center)
-            w = 125
-            h = 25
-            gfx.fillRoundRect((200 - w / 2), 142, w, h, 5)
-            gfx.setImageDrawMode(gfx.kDrawModeFillWhite)
-            roobert_11:drawTextAligned('Leaderboard', 200, 145, kTextAlignment.center)
+            plainText(120, 11, 'Start')
+            borderText(125, 25, 142, 145, 11, 'Leaderboard')
         end
-        gfx.setImageDrawMode(gfx.kDrawModeFillBlack)
-
         if pd.buttonJustPressed('down') then
             gfx.clear()
             select -= 1
@@ -119,16 +121,9 @@ function menu(state, player, spawnTimer)
             gfx.clear()
         end
     elseif state == 'Leaderboard' then
-
-        roobert_24:drawTextAligned('High Scores', 200, 5, kTextAlignment.center)
-
+        plainText(5, 24, 'High Scores')
         showLeaderboard(200, 50, player)
-        gfx.setImageDrawMode(gfx.kDrawModeFillBlack)
-        w = 105
-        h = 25
-        gfx.fillRoundRect((200 - w / 2), 212, w, h, 5)
-        gfx.setImageDrawMode(gfx.kDrawModeFillWhite)
-        roobert_11:drawTextAligned('Main Menu', 200, 215, kTextAlignment.center)
+        borderText(105, 25, 212, 215, 11, 'Main Menu')
         gfx.setImageDrawMode(gfx.kDrawModeFillBlack)
         if pd.buttonJustPressed('a') then
             state = 'Menu'
@@ -143,13 +138,7 @@ function menu(state, player, spawnTimer)
             if player.score > highestScore then
                 scoreString = (player.score..' !')
             end
-            local w = 40
-            local h = 40
-            gfx.setImageDrawMode(gfx.kDrawModeFillBlack)
-            gfx.fillRoundRect((200 - w / 2), 15, w, h, 5)
-            gfx.setImageDrawMode(gfx.kDrawModeFillWhite)
-            roobert_11:drawTextAligned(scoreString, 200, 25, kTextAlignment.center)
-            gfx.setImageDrawMode(gfx.kDrawModeFillBlack)
+            borderText(40, 40, 15, 25, 11, scoreString)
         else
             spawnTimer:pause()
             for i = 1, #leader do
