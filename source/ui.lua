@@ -161,12 +161,12 @@ function menu(state, player, spawnTimer)
     elseif state == 'GameOverMain' then
 
         if player.score > highestScore then
-            gfx.fillRoundRect(70, 15, 260, 175, 5)
+            gfx.fillRoundRect(70, 15, 260, 160, 5)
             gfx.setImageDrawMode(gfx.kDrawModeFillWhite)
             roobert_11:drawTextAligned('New High Score!', 200, 115, kTextAlignment.center)
             roobert_10:drawTextAligned('A - Continue', 200, 150, kTextAlignment.center)
         elseif newHighScore then
-            gfx.fillRoundRect(70, 15, 260, 175, 5)
+            gfx.fillRoundRect(70, 15, 260, 160, 5)
             gfx.setImageDrawMode(gfx.kDrawModeFillWhite)
             roobert_11:drawTextAligned('High Score!', 200, 115, kTextAlignment.center)
             roobert_10:drawTextAligned('A - Continue', 200, 150, kTextAlignment.center)
@@ -219,6 +219,9 @@ function menu(state, player, spawnTimer)
             newHighScore = false
             clearSprites()
             startGame()
+            highIndex = string.find(leader[1], '-')
+            highestScore = string.sub(leader[1], highIndex + 1)
+            highestScore = tonumber(highestScore)
         elseif pd.buttonJustPressed('b') then
             newHighScore = false
             state = 'Menu'
