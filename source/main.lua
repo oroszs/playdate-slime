@@ -13,7 +13,7 @@ import "ui"
 
 local pd <const> = playdate
 local gfx <const> = pd.graphics
-local current, player, score, crankUI, spawnTimer, playerName
+local current, player, score, crankUI, spawnTimer, playerName, pause
 local spawning = false
 local slimeAnim = gfx.imagetable.new("images/slime-anim")
 local gameState = 'Menu'
@@ -26,6 +26,7 @@ function startGame()
     if playerName then
         player.name = playerName
     end
+    pause = Pause(0, 0, 400, 240)
     current = level(player)
     spawnTimer = pd.timer.new(5000)
     spawnTimer.repeats = true
@@ -36,6 +37,7 @@ end
 function crankCheck(state)
     if pd.isCrankDocked() then
         if not (state == 'Pause') then
+            pause:add()
             state = 'Pause'
             pd.ui.crankIndicator:start()
             spawnTimer:pause()
@@ -43,6 +45,7 @@ function crankCheck(state)
         end
     else
         if (state == 'Pause') then
+            pause:remove()
             state = 'Game'
             spawning = true
             spawnTimer:start()

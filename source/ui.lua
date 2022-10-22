@@ -28,12 +28,23 @@ if not leader or debug then
     leader = tempLeader
 end
 
+class('Pause').extends(gfx.sprite)
+
+function Pause:init(x, y, w, h)
+    Pause.super.init(self)
+    local img = gfx.image.new(w, h)
+    gfx.pushContext(img)
+        gfx.fillRect(x, y, w, h)
+        gfx.setImageDrawMode(gfx.kDrawModeFillWhite)
+        roobert_24:drawTextAligned('Paused', 200, 100, kTextAlignment.center)
+        gfx.setImageDrawMode(gfx.kDrawModeFillBlack)
+    gfx.popContext()
+    self:setImage(img)
+    self:setCenter(0, 0)
+end
+
 function pause()
-    gfx.fillRect(0, 0, 400, 240)
-    gfx.setImageDrawMode(gfx.kDrawModeFillWhite)
-    roobert_24:drawTextAligned('Paused', 200, 100, kTextAlignment.center)
     pd.ui.crankIndicator:update()
-    gfx.setImageDrawMode(gfx.kDrawModeFillBlack)
 end
 
 function clearSprites()
