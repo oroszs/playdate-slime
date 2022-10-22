@@ -12,7 +12,7 @@ local roobert_11 <const> = gfx.font.new('fonts/Roobert/Roobert-11-Medium')
 local roobert_20 <const> = gfx.font.new('fonts/Roobert/Roobert-20-Medium')
 local roobert_24 <const> = gfx.font.new('fonts/Roobert/Roobert-24-Medium')
 
-local highIndex, highestScore, newHighScoreIndex
+local highIndex, highestScore, newHighScoreIndex, menuSet
 local newHighScore = false
 local leader = pd.datastore.read('leaderboard')
 local tempLeader = {}
@@ -38,6 +38,20 @@ function Pause:init(x, y, w, h)
         gfx.setImageDrawMode(gfx.kDrawModeFillWhite)
         roobert_24:drawTextAligned('Paused', 200, 100, kTextAlignment.center)
         gfx.setImageDrawMode(gfx.kDrawModeFillBlack)
+    gfx.popContext()
+    self:setImage(img)
+    self:setCenter(0, 0)
+end
+
+class('MainMenu').extends(gfx.sprite)
+
+function MainMenu:init(x, y)
+    MainMenu.super.init(self)
+    local img = gfx.image.new(400, 240)
+    gfx.pushContext(img)
+        borderText(200, 50, 15, 25, 24, 'Slime Climb')
+        plainText(120, 11, 'Start')
+        plainText(145, 11, 'Leaderboard')
     gfx.popContext()
     self:setImage(img)
     self:setCenter(0, 0)
@@ -102,34 +116,44 @@ end
 
 function menu(state, player, spawnTimer)
     if state == 'Menu' then
-        borderText(200, 50, 15, 25, 24, 'Slime Climb')
-        if select == 1 then
-            borderText(60, 25, 117, 120, 11, 'Start')
-            plainText(145, 11, 'Leaderboard')
-        elseif select == 2 then
-            plainText(120, 11, 'Start')
-            borderText(125, 25, 142, 145, 11, 'Leaderboard')
+        if not menuSet then
+            mainMenu:add()
+            uiR:add()
+            uiL:add()
+            menuSet = true
         end
         if pd.buttonJustPressed('down') then
-            gfx.clear()
             select -= 1
         elseif pd.buttonJustPressed('up') then
-            gfx.clear()
             select += 1
         end
         if select < 1 then select = 2
         elseif select > 2 then select = 1
         end
-        if pd.buttonJustPressed('a') and select == 1 then
-            startGame()
-            highIndex = string.find(leader[1], '-')
-            highestScore = string.sub(leader[1], highIndex + 1)
-            highestScore = tonumber(highestScore)
-            state = 'Game'
-            gfx.clear()
-        elseif pd.buttonJustPressed('a') and select == 2 then
-            state = 'Leaderboard'
-            gfx.clear()
+        if select == 1 then
+            uiR:moveTo(uiR.posOne.x, uiR.posOne.y)
+            uiL:moveTo(uiL.posOne.x, uiL.posOne.y)
+            if pd.buttonJustPressed('a') then
+                startGame()
+                highIndex = string.find(leader[1], '-')
+                highestScore = string.sub(leader[1], highIndex + 1)
+                highestScore = tonumber(highestScore)
+                state = 'Game'
+                mainMenu:remove()
+                uiR:remove()
+                uiL:remove()
+                menuSet = false
+            end
+        elseif select == 2 then
+            uiL:moveTo(uiL.posTwo.x, uiL.posTwo.y)
+            uiR:moveTo(uiR.posTwo.x, uiR.posTwo.y)
+            if pd.buttonJustPressed('a') then
+                state = 'Leaderboard'
+                mainMenu:remove()
+                uiR:remove()
+                uiL:remove()
+                menuSet = false
+            end
         end
     elseif state == 'Leaderboard' then
         plainText(5, 24, 'High Scores')
@@ -241,3 +265,11 @@ function menu(state, player, spawnTimer)
     end
     return state
 end
+
+mainMenu = MainMenu(0, 0)
+uiR = Aim(0, 0, 3)
+uiR.posOne = pd.geometry.vector2D.new(235, 128)
+uiR.posTwo = pd.geometry.vector2D.new(270, 153)
+uiL = Aim(0, 0, 3)
+uiL.posOne = pd.geometry.vector2D.new(160, 128)
+uiL.posTwo = pd.geometry.vector2D.new(125, 153)

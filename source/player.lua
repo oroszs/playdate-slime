@@ -19,7 +19,6 @@ function Aim:init(x, y, r)
     gfx.popContext()
     self:setImage(img)
     self:setCenter(0, 0)
-    self:add()
 end
 
 class('Player').extends(AnimatedSprite)
@@ -29,6 +28,7 @@ function Player:init(imageTable, x, y, w)
     Player.super.init(self, imageTable)
 
     self.aim = Aim(x, y, 30)
+    self.aim:add()
     self.alive = true
     self.aimVec = pd.geometry.vector2D.new(0, 0)
     self.acceleration = 1

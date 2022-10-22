@@ -13,20 +13,21 @@ import "ui"
 
 local pd <const> = playdate
 local gfx <const> = pd.graphics
-local current, player, score, crankUI, spawnTimer, playerName, pause
+local current, player, score, crankUI, spawnTimer, playerName, mainMenu, pause
 local spawning = false
 local slimeAnim = gfx.imagetable.new("images/slime-anim")
 local gameState = 'Menu'
 
+
 math.randomseed(pd.getSecondsSinceEpoch())
 
 function startGame()
+    pause = Pause(0, 0, 400, 240)
     player = Player(slimeAnim, 100, 185, 15)
     playerName = pd.datastore.read('playerName')
     if playerName then
         player.name = playerName
     end
-    pause = Pause(0, 0, 400, 240)
     current = level(player)
     spawnTimer = pd.timer.new(5000)
     spawnTimer.repeats = true
@@ -55,11 +56,11 @@ function crankCheck(state)
 end
 
 function game()
-    if gameState == 'Game' and player.alive then
-        scroll(current)
-    end
     if (gameState == 'Game') or (gameState == 'Pause') and player.alive then
         gameState = crankCheck(gameState)
+    end
+    if gameState == 'Game' and player.alive then
+        scroll(current)
     end
 end
 
