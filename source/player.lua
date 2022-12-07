@@ -115,7 +115,7 @@ function Player:update()
         ceilCheck(self, 4)
         gravity(self, dt)
         move(self, dt)
-        aim(self)
+        if self.grounded then aim(self) else self.aim:moveTo(-10, -10) end
     end
     if not self.alive then
         self.aim:remove()
