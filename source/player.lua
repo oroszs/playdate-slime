@@ -48,6 +48,7 @@ function Player:init(imageTable, x, y, w)
     self.jumping = false
     self.hit = false
     self.name = 'Player'
+    self.type = 'Player'
     self:addState("Idle", 1, 7, {tickStep = 2}, true)
     self:addState("Jump", 26, 32, {tickStep = 2, nextAnimation = "Idle"})
     self:addState("Charge", 8, 25, {tickStep = 2, loop = false})
@@ -61,6 +62,25 @@ function Player:init(imageTable, x, y, w)
 	end
 
     aim(self)
+end
+
+function Player:update()
+
+    Player.super.update(self)
+    local dt = deltaTime(lt)
+    if self.alive and not pd.isCrankDocked() then
+        aliveCheck(self)
+        move(self, dt)
+        groundCheck(self)
+        jumpCheck(self, 10)
+        ceilCheck(self, 4)
+        gravity(self, dt)
+        if self.grounded then aim(self) else self.aim:moveTo(-10, -10) end
+    end
+    if not self.alive then
+        self.aim:remove()
+    end
+
 end
 
 function jump(spr)
@@ -86,6 +106,7 @@ function jump(spr)
     spr.dy = spr.aimVec.y * jForce
     
     spr:moveTo(spr.x + spr.dx, spr.y + spr.dy)
+    --print("Player Jump Frame")
     spr.jumping = true
 end
 
@@ -104,25 +125,6 @@ function getPos(ax, ay, r)
     return pos
 end
 
-function Player:update()
-
-    Player.super.update(self)
-    local dt = deltaTime(lt)
-    if self.alive and not pd.isCrankDocked() then
-        aliveCheck(self)
-        groundCheck(self)
-        jumpCheck(self, 10)
-        ceilCheck(self, 4)
-        gravity(self, dt)
-        move(self, dt)
-        if self.grounded then aim(self) else self.aim:moveTo(-10, -10) end
-    end
-    if not self.alive then
-        self.aim:remove()
-    end
-
-end
-
 function aliveCheck(spr)
     if spr.x < -30 or spr.y > 260 then
         spr.alive = false
@@ -138,6 +140,7 @@ function aim(spr)
 end
 
 function groundCheck(spr)
+    --print("Grounded Check")
     local collSprites = spr.querySpritesInRect(spr.x, spr.y + spr.w, spr.w, 2)
     local wasGrounded = spr.grounded
     spr.grounded = false
@@ -160,7 +163,7 @@ function groundCheck(spr)
     end
 
     if not (wasGrounded == spr.grounded) then
-        if spr.grounded then print('Grounded') else print('Not Grounded') end
+        --if spr.grounded then print('Grounded') else print('Not Grounded') end
     end
 end
 
@@ -212,11 +215,9 @@ function bounceCheck(player, other)
         if player.x < other.x then
             player.dx = -player.bounceForce.x
             player.dy = -player.bounceForce.y
-            print('before', player.x, player.y)
             player:moveTo(player.x + player.dx, player.y + player.dy)
-            print('after', player.x, player.y)
             hit = true
-            print('hit!')
+            --print('hit!')
         elseif player.x > other.x then
             player.dx = player.bounceForce.x
             player.dy = -player.bounceForce.y
@@ -259,8 +260,9 @@ function move(spr, dt)
     if spr.currentState == "Charge" then spr.moveSpeed = 0 end
 
     if not spr.jumping then
+        --print("Bounce Check")
         local overlaps
-        local collSize = 8
+        local collSize = 4
         if spr.dx > 0 then
             overlaps = spr.querySpritesInRect(spr.x + spr.w, spr.y, collSize, spr.w)
         elseif spr.dx <= 0 then
@@ -274,6 +276,7 @@ function move(spr, dt)
             end
         end
         if not spr.hit then
+            --print("Move Player " .. spr.dx .. "px x " .. spr.dy .. "px")
             local ax, ay, colls, len = spr:moveWithCollisions(spr.x + spr.dx + spr.moveSpeed, spr.y + spr.dy)
             for i = 1, #colls do
                 if colls[i].other:getTag() == 4 then

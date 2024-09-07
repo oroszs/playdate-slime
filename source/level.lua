@@ -10,10 +10,16 @@ local gfx = pd.graphics
 local moving = false
 
 function scroll(level)
+    ---Tags---
+    --- 1: Floor
+    --- 2: Block, MovingBlock, SpikeBlockHolder
+    --- 3: Player
+    --- 4: Top and Bottom SpikeBlock
     local speed = 1
     for i in pairs(level) do
         if level[i] and level[i]:getTag() == 2 or level[i]:getTag() == 1 or (level[i]:getTag() == 3 and level[i].grounded) then
             level[i]:moveTo(level[i].x - speed, level[i].y)
+            --if(level[i].type) then print("Scrolling " .. level[i].type) end
             if (level[i].type == 'SpikeWall' and (level[i].x + level[i].w) < level.player.x) and not level[i].cleared and level.player.alive then
                 level.player.score += 1
                 level[i].cleared = true
@@ -27,7 +33,7 @@ function scroll(level)
 end
 
 function floor(first)
-    ---screen dimensions: 400 x 240
+    ---screen dimensions: 400px x 240px
     local wallWidth = 5
     local screenWidth = 400
     local screenHeight = 240
@@ -64,7 +70,7 @@ function level(player)
     currentLevel.block0.type = nil
 
     function spawnBlock()
-        print('Spawned!')
+        --print('Spawned!')
         if not first then
             local adjustment = math.floor(math.random() * 3) - 1
             choice += adjustment
